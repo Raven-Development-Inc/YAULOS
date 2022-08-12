@@ -1,0 +1,10 @@
+// Kernel for RavenOS 1.0.0 Alpha - 1.2.0
+
+// Assembly headers
+BITS == 16
+MINREGS 8
+MINHEAP 256
+
+// Code
+.Init
+	jmp .Init //infinite loop, not done yet
