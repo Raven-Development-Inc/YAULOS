@@ -9,7 +9,7 @@ MINHEAP 4096
 .Init
 	jmp .Init //infinite loop, not done yet
 
-// Some Virtual Registers
+// Some Virtual Registers For data storage
 .Virtual_Regs
 	dw 0
 	dw 0
