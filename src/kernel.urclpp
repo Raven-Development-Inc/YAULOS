@@ -3,8 +3,27 @@
 // Assembly headers
 BITS == 16
 MINREGS 8
-MINHEAP 256
+MINHEAP 4096
 
 // Code
 .Init
 	jmp .Init //infinite loop, not done yet
+
+// Some Virtual Registers
+.Virtual_Regs
+	dw 0
+	dw 0
+	dw 0
+	dw 0
+	dw 0
+	dw 0
+	dw 0
+	dw 0
+	dw 0
+	dw 0
+	dw 0
+	dw 0
+	dw 0
+	dw 0
+	dw 0
+	dw 0
