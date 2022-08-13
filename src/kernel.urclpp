@@ -27,3 +27,12 @@ MINHEAP 4096
 	dw 0
 	dw 0
 	dw 0
+	
+// Some syscalls
+.printStr
+	nop
+	ret
+
+.sqrt
+	nop
+	ret
