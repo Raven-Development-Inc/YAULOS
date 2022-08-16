@@ -1,3 +1,6 @@
+//Credit to em3rald1#2431 
+
+
 @define MALLOC_MAINP M0
 @define F16PI 0x4248
 @define F16E  0x4170
