@@ -7,6 +7,7 @@ MINHEAP 4096
 
 // Code
 .Init
+	cal .init_malloc
 	jmp .Init //infinite loop, not done yet
 
 // Some Virtual Registers For data storage
@@ -36,4 +37,5 @@ MINHEAP 4096
 
 
 // OS variables
-// dw [
+.welcome_message
+	dw ["RavenOS Version
