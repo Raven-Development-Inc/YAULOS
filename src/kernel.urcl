@@ -4,10 +4,12 @@
 BITS == 16
 MINREGS 8
 MINHEAP 4096
+MINSTACK 256
 
 // Code
 .Init
 	cal .init_malloc
+	cal .get_raven_version
 	jmp .Init //infinite loop, not done yet
 
 // Some Virtual Registers For data storage
@@ -31,11 +33,17 @@ MINHEAP 4096
 	
 // Some syscalls ------------------------------------------------------------
 
-
+.get_raven_version
+	imm r1 .version1
+	psh .version2
+	cal printf
+	ret
 
 // --------------------------------------------------------------------------
 
 
 // OS variables
-.welcome_message
-	dw ["RavenOS Version
+.version1
+	dw ["RavenOS Version %s" 0xa0 0]
+.version2
+	dw ["0.1.0 alpha" 0]
