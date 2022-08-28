@@ -11,25 +11,6 @@ MINSTACK 256
 	cal .init_malloc
 	cal .get_raven_version
 	jmp .Init //infinite loop, not done yet
-
-// Some Virtual Registers For data storage
-.Virtual_Regs
-	dw 0
-	dw 0
-	dw 0
-	dw 0
-	dw 0
-	dw 0
-	dw 0
-	dw 0
-	dw 0
-	dw 0
-	dw 0
-	dw 0
-	dw 0
-	dw 0
-	dw 0
-	dw 0
 	
 // Some syscalls ------------------------------------------------------------
 
@@ -38,6 +19,11 @@ MINSTACK 256
 	psh .version2
 	cal printf
 	ret
+.get_api_version
+	imm r1, api_version
+	cal printf
+	ret
+
 
 // --------------------------------------------------------------------------
 
@@ -47,3 +33,5 @@ MINSTACK 256
 	dw ["RavenOS Version %s" 0xa0 0]
 .version2
 	dw ["0.1.0 alpha" 0]
+.api_version
+	dw ["1" 0]
