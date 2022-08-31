@@ -6,20 +6,23 @@ MINREGS 8
 MINHEAP 4096
 MINSTACK 256
 
+.Syscalls
+	dw .os_get_api_version
+	dw .os_get_raven_version
 // Code
 .Init
 	cal .init_malloc
-	cal .get_raven_version
+	cal .os_get_raven_version
 	jmp .Init //infinite loop, not done yet
 	
 // Some syscalls ------------------------------------------------------------
 
-.get_raven_version
+.os_get_raven_version
 	imm r1 .version1
 	psh .version2
 	cal printf
 	ret
-.get_api_version
+.os_get_api_version
 	imm r1, api_version
 	cal printf
 	ret
