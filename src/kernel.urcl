@@ -7,6 +7,9 @@ MINHEAP 4096
 MINSTACK 256
 MINRAM 8192
 
+.Bits
+	dw @bits
+
 .Syscalls
 	dw .os_get_api_version
 	dw .os_get_raven_version
