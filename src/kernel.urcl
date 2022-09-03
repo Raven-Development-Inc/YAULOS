@@ -9,6 +9,8 @@ MINRAM 8192
 
 .Bits
 	dw @bits
+.MinRegs
+	dw @minregs
 
 .Syscalls
 	dw .os_get_api_version
