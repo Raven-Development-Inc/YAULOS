@@ -5,6 +5,7 @@ BITS == 16
 MINREGS 8
 MINHEAP 4096
 MINSTACK 256
+MINRAM 8192
 
 .Syscalls
 	dw .os_get_api_version
@@ -31,14 +32,14 @@ MINSTACK 256
 	imm r1, api_version
 	cal printf
 	ret
-.os_error //Error string goes in R1
+.os_error //Error string ptr goes in R1
 	cal print_string
 	ret
 
 //Disk
 
 .os_peek
-	ret
+	IN 
 .os_poke
 	ret
 .os_change_page
