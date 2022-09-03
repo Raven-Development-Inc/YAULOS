@@ -9,6 +9,10 @@ MINSTACK 256
 .Syscalls
 	dw .os_get_api_version
 	dw .os_get_raven_version
+	dw .os_error
+	dw .os_change_page
+	dw .os_peek
+	dw .os_poke
 // Code
 .Init
 	cal .init_malloc
@@ -17,16 +21,28 @@ MINSTACK 256
 	
 // Some syscalls ------------------------------------------------------------
 
-.os_get_raven_version
+//Musc
+.os_get_raven_version //Print RavenOS Version
 	imm r1 .version1
 	psh .version2
 	cal printf
 	ret
-.os_get_api_version
+.os_get_api_version //Prints API version
 	imm r1, api_version
 	cal printf
 	ret
+.os_error //Error string goes in R1
+	cal print_string
+	ret
 
+//Disk
+
+.os_peek
+	ret
+.os_poke
+	ret
+.os_change_page
+	ret
 
 // --------------------------------------------------------------------------
 
