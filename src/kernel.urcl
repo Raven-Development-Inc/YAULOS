@@ -53,7 +53,9 @@ MINRAM 8192
 .os_change_page
 	ret
 	
-// FS (RFS32)
+// FS (RFS32) RavenFS 32(pages per file, so RFS16 would be a maximum of 16 pages 
+//per file and so on and so on
+
 
 // --------------------------------------------------------------------------
 

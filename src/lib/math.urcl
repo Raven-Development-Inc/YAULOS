@@ -1,0 +1,9 @@
+.sqrt
+    psh r1 // x
+    psh r2 // tmp 
+    bsl r2 15 10
+    add r1 r1 r2
+    rsh r1 r1
+    pop r2
+    pop r9
+    ret
