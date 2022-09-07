@@ -47,7 +47,7 @@ MINRAM 8192
 //Disk
 
 .os_peek
-	IN 
+	ret
 .os_poke
 	ret
 .os_change_page
