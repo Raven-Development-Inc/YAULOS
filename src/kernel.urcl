@@ -45,8 +45,8 @@ MINRAM 65536
 	imm r1, api_version
 	cal printf
 	ret
-.os_error //Error string code goes in R1 (is an int bc memory constraints)
-	cal print_int
+.os_error //Error code goes in .errorCode use llod to change it(is an int bc memory constraints)
+	imm r1 .errorCode
 	ret
 
 //Disk
