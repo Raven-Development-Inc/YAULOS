@@ -26,6 +26,7 @@ MINRAM 65536
 	dw .os_poke //6
 	dw .os_create_file //7
 	dw .os_delete_file //8
+	dw .os_format_disk //9
 // Code
 .Init
 	cal .init_malloc
@@ -61,6 +62,8 @@ MINRAM 65536
 	
 // FS (RFS32) RavenFS 32(pages per file, so RFS16 would be a maximum of 16 pages 
 //per file and so on and so on
+.os_format_disk
+	ret
 .os_create_file
 	ret
 .os_delete_file
