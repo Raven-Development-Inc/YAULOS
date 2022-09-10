@@ -3,3 +3,8 @@ MINREG 8
 MINSTACK 64
 MINRAM 8192
 MINHEAP 4096
+
+.Pointer
+	dw 0
+.Data
+	dw 0
