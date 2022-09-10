@@ -55,10 +55,11 @@ MINRAM 65536
 //Disk
 
 .os_peek //IN: r1 = address OUT: r2 = data
-	out %ADDRESS R1
+	out %address R1
 	in R2 %BUS
 	ret
-.os_poke
+.os_poke //IN: r1 = address r2 = data OUT: none
+	out %address 
 	ret
 .os_change_page
 	ret
