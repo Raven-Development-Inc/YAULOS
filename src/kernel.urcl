@@ -45,8 +45,8 @@ MINRAM 65536
 	imm r1, api_version
 	cal printf
 	ret
-.os_error //Error string ptr goes in R1
-	cal print_string
+.os_error //Error string code goes in R1 (is an int bc memory constraints)
+	cal print_int
 	ret
 
 //Disk
