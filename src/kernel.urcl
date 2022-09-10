@@ -51,8 +51,10 @@ MINRAM 65536
 //Disk
 
 .os_peek //IN: r1 = address OUT: r2 = data
+	psh r1
 	out %ADDRESS R1
 	in R2 %BUS
+	pop r1
 	ret
 .os_poke
 	ret
