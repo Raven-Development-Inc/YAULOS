@@ -25,7 +25,7 @@ MINRAM 65536
 	dw .os_peek //5
 	dw .os_poke //6
 	dw .os_create_file //7
-	dw .os_delete_file
+	dw .os_delete_file //8
 // Code
 .Init
 	cal .init_malloc
