@@ -17,7 +17,7 @@ MINRAM 65536
 .MinHeap
 	dw @minheap
 
-.Syscalls
+.Syscalls //9 sys calls so far, planning on expanding the fs
 	dw .os_get_api_version //1
 	dw .os_get_raven_version //2
 	dw .os_error //3
