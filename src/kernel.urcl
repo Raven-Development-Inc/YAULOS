@@ -18,12 +18,12 @@ MINRAM 65536
 	dw @minheap
 
 .Syscalls
-	dw .os_get_api_version
-	dw .os_get_raven_version
-	dw .os_error
-	dw .os_change_page
-	dw .os_peek
-	dw .os_poke
+	dw .os_get_api_version //1
+	dw .os_get_raven_version //2
+	dw .os_error //3
+	dw .os_change_page //4
+	dw .os_peek //5
+	dw .os_poke //6
 	dw .os_create_file
 	dw .os_delete_file
 // Code
