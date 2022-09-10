@@ -70,3 +70,7 @@ bits == 16
         jmp r9
     .printf__percsub__err_str
         dw [ "Wrong percentage-value %c" 0 ]
+
+.print_int //int goes in r1
+	out %int r1
+	ret

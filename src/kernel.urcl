@@ -51,10 +51,8 @@ MINRAM 65536
 //Disk
 
 .os_peek //IN: r1 = address OUT: r2 = data
-	psh r1
 	out %ADDRESS R1
 	in R2 %BUS
-	pop r1
 	ret
 .os_poke
 	ret
@@ -72,9 +70,11 @@ MINRAM 65536
 
 
 // OS variables
-.version1
+.version1 //pls dont change
 	dw ["RavenOS Version %s" 0xa0 0]
-.version2
-	dw ["0.1.0 alpha" 0]
-.api_version
+.version2 //pls dont change
+	dw ["0.1.1 alpha" 0]
+.api_version //pls dont change
 	dw ["1" 0]
+.errorCode //change with llod
+	dw 0
