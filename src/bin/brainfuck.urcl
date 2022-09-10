@@ -1,10 +1,19 @@
+// Headers
 BITS 16
 MINREG 8
 MINSTACK 64
 MINRAM 8192
 MINHEAP 4096
 
+imm r4 0
+brz .Init R4
+.Init
+	imm r1 256
+	cal malloc
+
 .Pointer
 	dw 0
 .Data
 	dw 0
+
+.data
