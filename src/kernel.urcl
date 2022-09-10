@@ -1,11 +1,11 @@
-// Kernel for URCLOS 1.0.0 Alpha - 1.2.0(1.2 massive overhual)
+// Kernel for URCLOS 1.0.0 Alpha - 1.2.0(1.2 and after = massive overhual)
 
 // Assembly headers
 BITS == 16
 MINREGS 8
 MINHEAP 4096
 MINSTACK 256
-MINRAM 8192
+MINRAM 65536
 
 //OS Vars
 .Bits
@@ -14,6 +14,8 @@ MINRAM 8192
 	dw @minregs
 .MinStack
 	dw @minstack
+.MinHeap
+	dw @minheap
 
 .Syscalls
 	dw .os_get_api_version
@@ -48,7 +50,9 @@ MINRAM 8192
 
 //Disk
 
-.os_peek
+.os_peek //IN: r1 = address OUT: r2 = data
+	out %ADDRESS R1
+	in R2 %BUS
 	ret
 .os_poke
 	ret
