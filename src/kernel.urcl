@@ -24,7 +24,7 @@ MINRAM 65536
 	dw .os_change_page //4
 	dw .os_peek //5
 	dw .os_poke //6
-	dw .os_create_file
+	dw .os_create_file //7
 	dw .os_delete_file
 // Code
 .Init
