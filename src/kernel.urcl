@@ -46,7 +46,10 @@ MINRAM 65536
 	cal printf
 	ret
 .os_error //Error code goes in .errorCode use llod to change it(is an int bc memory constraints)
+	psh r1
 	imm r1 .errorCode
+	out %uint r1
+	pop r1
 	ret
 
 //Disk
