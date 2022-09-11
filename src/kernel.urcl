@@ -117,7 +117,8 @@ MINRAM 65536
 	imm r2 0x00ff
 	cal os_poke
 	inc r1 r1
-	imm r2 0x0000
+	imm r2 0x0000 //more padding(mind you this fs is designed for 8 bit embeded systems
+	//so a 16 bit value would be separated into 2 8 bit values)
 	cal os_poke
 	inc r1 r1
 	
