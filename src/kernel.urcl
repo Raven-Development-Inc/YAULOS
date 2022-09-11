@@ -35,7 +35,7 @@ MINRAM 65536
 	
 // Some syscalls ------------------------------------------------------------
 
-//Musc
+//Misc
 .os_get_raven_version //Print RavenOS Version
 	imm r1 .version1
 	psh .version2
