@@ -4,7 +4,7 @@
 BITS == 16
 MINREGS 8
 MINHEAP 4096
-MINSTACK 256
+MINSTACK 1024 //a lot of stack for sbpc
 MINRAM 65536
 
 //OS Vars
@@ -70,7 +70,7 @@ MINRAM 65536
 
 // SimplexFS
 .os_format_disk //only call this once
-	// oh shit, gonna be a lot of imms and incs and cal os_pokes
+	// oh crap, gonna be a lot of imms and incs and cal os_pokes
 	
 	//damn, tones of RAM used
 	.e
@@ -146,7 +146,7 @@ MINRAM 65536
 	imm r1 .e2
 	cal .printf
 	pop r1
-	//also, fuck the user, the checksum headers aren't a thing, so the header is actually
+	//also, the checksum headers aren't a thing, so the header is actually
 	//smaller
 	
 	//FAT size(as in the size of the table) in 16 bit entries(0x0000 means the sector is
@@ -216,7 +216,7 @@ MINRAM 65536
 	cal .printf
 	pop r1
 	
-	//sxh_id: none, just fill the fucking void
+	//sxh_id: none, just fill the void
 	cal .os_poke //0x0000 already exists in r2 so u dont have to change it
 	inc r1 r1 
 	cal .os_poke
