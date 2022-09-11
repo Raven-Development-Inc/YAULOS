@@ -1,8 +1,8 @@
 // Brainfuck Interpreter v5.0.1
 minreg 5
-minheap 2048
+minheap 4096
 bits 16
-minstack 64
+minstack 256
 @define programstart 32768 // replace with amount of reserved memory
 @define programend r3
 @define bf_pc r4
