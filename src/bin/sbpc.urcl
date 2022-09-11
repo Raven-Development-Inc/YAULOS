@@ -16,10 +16,10 @@ hlt
 
 .interpret_sbpc
 cal .loadInputToMem
-imm sbpc_pc programend
+imm sbpc_sp programend
 .interpretloop
 lod currchar bf_pc
-bre .incPtr currchar '>'
+bre .incPtr currchar 'push'
 bre .decPtr currchar '<'
 bre .incMem currchar '+'
 bre .decMem currchar '-'
