@@ -72,8 +72,10 @@ MINRAM 65536
 	// oh shit, gonna be a lot of imms and incs and cal os_pokes
 	imm r1 0
 	cal .os_change_page
-	imm r1 0
-	imm r2 0xfe //load the magic number in simplex
+	imm r1 0 //first 8k page
+	
+	//load the magic number in simplex
+	imm r2 0xfe 
 	cal os_poke 
 	inc r1 r1
 	imm r2 0xca
@@ -81,7 +83,26 @@ MINRAM 65536
 	inc r1 r1
 	imm r2 0x01
 	cal os_poke
+	inc r1 r1
+	imm r2 0x32
+	cal os_poke
 	inc r1 r1 
+	imm r2 0x94
+	cal os_poke
+	inc r1 r1
+	
+	//ok, now load the number of sectors, remember, 256 byte sectors this header just BARELY fits in 256 bytes(254 bytes)
+	//so, 2^24/256 = 65536, great! just one imm, actually 2 bcause length of 2 
+	imm r2 0xffff
+	cal os_poke
+	inc r1 r1 
+	imm r2 0x0000
+	cal os_poke
+	inc r1 r1
+	//also, fuck the user, the checksum headers aren't a thing, so the header is actually
+	//smaller
+	
+	//
 	
 	ret
 .os_create_file
