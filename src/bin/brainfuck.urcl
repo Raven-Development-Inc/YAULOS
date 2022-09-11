@@ -1,3 +1,4 @@
+// Brainfuck Interpreter v5.0.1
 minreg 5
 minheap 2048
 bits 16
@@ -24,7 +25,7 @@ bre .incMem currchar '+'
 bre .decMem currchar '-'
 bre .printPtr currchar '.'
 bre .inputPtr currchar ','
-jmp 4
+jmp 4 //undefined behavior
 
 
 .incPtr

@@ -1,4 +1,4 @@
-// Kernel for URCLOS 1.0.0 Alpha - 1.2.0(1.2 and after = massive overhual)
+// UCOS 0.1.3
 
 // Assembly headers
 BITS == 16
