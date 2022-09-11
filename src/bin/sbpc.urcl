@@ -5,7 +5,7 @@ bits 16
 minstack 64
 @define programstart 32768 // replace with amount of reserved memory
 @define programend r3
-@define bf_sp r4
+@define sbpc_sp r4
 @define currchar r5
 
 
@@ -14,9 +14,9 @@ cal .interpret_sbpc
 hlt
 
 
-.interpret_bf
+.interpret_sbpc
 cal .loadInputToMem
-imm bf_pc programend
+imm sbpc_pc programend
 .interpretloop
 lod currchar bf_pc
 bre .incPtr currchar '>'
