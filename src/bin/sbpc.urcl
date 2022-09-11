@@ -1,4 +1,4 @@
-// Brainfuck Interpreter v5.0.1
+// SBPC Interpreter v1.0.0
 minreg 5
 minheap 2048
 bits 16
