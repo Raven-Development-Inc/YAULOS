@@ -75,28 +75,28 @@ MINRAM 65536
 	
 	//load the magic number in simplex
 	imm r2 0xfe 
-	cal os_poke 
+	cal .os_poke 
 	inc r1 r1
 	imm r2 0xca
-	cal os_poke
+	cal .os_poke
 	inc r1 r1
 	imm r2 0x01
-	cal os_poke
+	cal .os_poke
 	inc r1 r1
 	imm r2 0x32
-	cal os_poke
+	cal .os_poke
 	inc r1 r1 
 	imm r2 0x94
-	cal os_poke
+	cal .os_poke
 	inc r1 r1
 	
 	//ok, now load the number of sectors, remember, 256 byte sectors this header just BARELY fits in 256 bytes(254 bytes)
 	//so, 2^24/256 = 65536, great! just one imm, actually 2 bcause length of 2 
 	imm r2 0xffff
-	cal os_poke
+	cal .os_poke
 	inc r1 r1 
 	imm r2 0x0000
-	cal os_poke
+	cal .os_poke
 	inc r1 r1
 	//also, fuck the user, the checksum headers aren't a thing, so the header is actually
 	//smaller
@@ -105,22 +105,34 @@ MINRAM 65536
 	//unallocated, 0xffff means it is)
 	imm r2 0xffff //(65535 bytes or 8 files holy shit thats big, but thats only 8 files
 	//in a pool of 2048 files so idgaf)
-	cal os_poke
+	cal .os_poke
 	inc r1 r1
 	imm r2 0x0000 //padding
-	cal os_poke
+	cal .os_poke
 	inc r1 r1s
 	
 	//FAT size in sectors
 	//65536/256 = 256
 	//so...
 	imm r2 0x00ff
-	cal os_poke
+	cal .os_poke
 	inc r1 r1
 	imm r2 0x0000 //more padding(mind you this fs is designed for 8 bit embeded systems
 	//so a 16 bit value would be separated into 2 8 bit values)
-	cal os_poke
+	cal .os_poke
 	inc r1 r1
+	
+	//sector indes of root dir(it is 258)
+	imm r2 258 //idk the hex for 258 and am too lazy to search it up
+	cal .os_poke
+	inc r1 r1 
+	imm r2 0x0000 //WHY SO MUCH PADDING YOU SU-
+	cal .os_poke
+	inc r1 r1 
+	
+	//version of simplex: 1.0
+	imm r2 0x0100
+	cal .os_poke
 	
 	ret
 .os_create_file
