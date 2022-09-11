@@ -67,7 +67,6 @@ MINRAM 65536
 	ret
 	
 // SimplexFS
-//per file and so on and so on
 .os_format_disk //only call this once
 	// oh shit, gonna be a lot of imms and incs and cal os_pokes
 	imm r1 0
@@ -102,7 +101,25 @@ MINRAM 65536
 	//also, fuck the user, the checksum headers aren't a thing, so the header is actually
 	//smaller
 	
-	//
+	//FAT size(as in the size of the table) in 16 bit entries(0x0000 means the sector is
+	//unallocated, 0xffff means it is)
+	imm r2 0xffff //(65535 bytes or 8 files holy shit thats big, but thats only 8 files
+	//in a pool of 2048 files so idgaf)
+	cal os_poke
+	inc r1 r1
+	imm r2 0x0000 //padding
+	cal os_poke
+	inc r1 r1s
+	
+	//FAT size in sectors
+	//65536/256 = 256
+	//so...
+	imm r2 0x00ff
+	cal os_poke
+	inc r1 r1
+	imm r2 0x0000
+	cal os_poke
+	inc r1 r1
 	
 	ret
 .os_create_file
