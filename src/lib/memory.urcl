@@ -1,0 +1,219 @@
+/**
+    URCL Memory management library
+    Minimal bits that can run this library: 16
+    Minimal stack that can run this library is underfined, but recommended to set it to 0x30-0xff
+    Minimal heap that can be used depends on amount of allocations your program is supposed to make
+    Functions included:
+    -   void* malloc(size_t);
+    -   void free(void*);
+    -   void init_malloc();
+    -   void defragm_global();
+    -   void fast_free(void*);
+    Function descriptions:
+    -   void* malloc(size_t);
+    --      Allocates space on heap with size of an argument, returns pointer to the first data word of allocated block
+    -   void free(void*);
+    --      Deletes all the data stored in block, changes header of block to free status and defragmentates whole malloc-heap
+    -   void init_malloc();
+    --      Initializes heap for it to be useable, if not called, malloc(size_t), free(void*), fast_free(void*) and defragm_global() may cause memory corruption.
+    --      If heap is initialized, storing to the constant address may cause memory corruption
+    -   void defragm_global();
+    --      Defragmentates whole malloc-heap for concatenation of free blocks.
+    -   void fast_free(void*);
+    --      Deletes all the data stored in block, changes header of block to free status and defragmentates adjacent block instead of whole malloc-heap
+    Author: em3rald1
+    Thanks to Kuggo, Tuk(eque), Verlio_H
+*/
+
+bits >= 16
+minheap 0xffff
+minstack 0x30
+minreg 5
+@define MALLOC_MAINP M0
+
+.init_malloc
+str MALLOC_MAINP 0xffff
+ret
+
+.malloc
+    psh r1 // size
+    psh r2 // dynamic malloc_start*
+    imm r2 MALLOC_MAINP
+    psh r3 // additional reg
+    psh r4
+    .malloc__loop1
+        lod r3 r2
+        brg .malloc__found__free r3 0x8000
+        and r3 r3 0x7fff
+        mov r2 r3
+        jmp .malloc__loop1
+    
+    .malloc__found__free
+        and r3 r3 0x7fff // getting address of next chunk (can work as size indicator)
+        sub r4 r3 r2 // size of chunk available
+        brl .malloc__found r1 r4
+        // bre .malloc__found__partition__needed r1 r4
+        bre .malloc__fail r3 0x7fff // check for failure
+        bre .malloc__fail r3 0x0000
+        mov r2 r3
+        jmp .malloc__loop1
+    .malloc__fail
+        pop r4
+        pop r3
+        pop r2
+        pop r1
+        imm r1 0xffff // -1
+        ret
+    .malloc__found
+        bne .malloc__found__skip r3 0x7fff // if ( address_of_the_next_chunk == 0x7fff) {
+        // r1 - size, r2 - pointer to curr chunk, r3 - addr to next chunk, r4 - size of chunk
+        psh r4
+        mov r4 r1
+        add r4 r4 r2
+        and r4 r4 0x7fff
+        add r4 r4 1
+        str r2 r4
+        str r4 0xffff
+        pop r4
+        jmp .malloc__end
+        // }
+        .malloc__found__skip 
+        bre .malloc__found__skip2 r1 r4 // if ( chunk_size != req_size ) { -> fragmentation
+        psh r4
+        psh r3
+        or r3 r3 0x8000 // making header from address
+        mov r4 r1 // 
+        add r4 r4 r2 // pointer to next header
+        and r4 r4 0x7fff 
+        add r4 r4 1 // making offset
+        str r2 r4
+        lod r5 r4
+        bne .malloc__found__endstack r5 0xffff // if ( r4* == END_OF_MALLOC_STACK ) {
+        str r4 0xffff
+        jmp .malloc__found__endstack_2
+        .malloc__found__endstack // } else {
+        str r4 r3
+        .malloc__found__endstack_2 // }
+        pop r3
+        pop r4
+        jmp .malloc__end
+        .malloc__found__skip2 // } else { -> simple address storing
+        and r3 r3 0x8000
+        str r2 r3
+        .malloc__end
+        pop r4
+        pop r3
+        mov r1 r2
+        inc r1 r1
+        pop r2
+        pop r0
+        ret
+
+.fast_free
+    psh r1 // pointer
+    psh r2 // additional data
+    psh r3
+    psh r4
+    and r1 r1 0x7fff
+    dec r1 r1
+    lod r2 r1
+    brg .fast_free__alreadyfree r2 0x7fff
+    bre .fast_free__alreadyfree r2 0
+    sub r3 r2 r1 // size
+    dec r3 r3
+    inc r1 r1
+    mov r4 r1
+    dec r1 r1
+    .fast_free__loop1
+        str r4 0
+        inc r4 r4
+        dec r3 r3
+        bre .fast_free__freed r3 0
+        jmp .fast_free__loop1
+.fast_free__freed
+    or r2 r2 0x8000
+    str r1 r2
+.fast_free__alreadyfree
+    cal .defragm
+    pop r4
+    pop r3
+    pop r2
+    pop r1
+    ret
+.defragm
+    psh r1 // pointer
+    psh r2 // additional data
+    psh r3
+    lod r2 r1
+    brl .defragm_end r2 0x8000 // not free
+    and r2 r2 0x7fff
+    lod r3 r2
+    brl .defragm_end r3 0x8000
+    and r3 r3 0x7fff
+    str r1 r3
+    str r2 0
+    .defragm_end
+    pop r3
+    pop r2
+    pop r1
+    ret
+
+.free   
+    psh r1 // pointer
+    psh r2 // additional data
+    psh r3
+    psh r4
+    and r1 r1 0x7fff
+    dec r1 r1
+    lod r2 r1
+    brg .free__alreadyfree r2 0x7fff
+    bre .free__alreadyfree r2 0
+    sub r3 r2 r1 // size
+    dec r3 r3
+    inc r1 r1
+    mov r4 r1
+    dec r1 r1
+    .free__loop1
+        str r4 0
+        inc r4 r4
+        dec r3 r3
+        bre .free__freed r3 0
+        jmp .free__loop1
+.free__freed
+    or r2 r2 0x8000
+    str r1 r2
+.free__alreadyfree
+    cal .defragm_global
+    pop r4
+    pop r3
+    pop r2
+    pop r1
+    ret
+        
+
+.defragm_global
+    psh r1 // dynamic malloc heap pointer
+    imm r1 MALLOC_MAINP
+    psh r2 // additional stuff
+    psh r3
+    .defragm_global__loop1
+        lod r2 r1
+        bre .defragm_global__end r2 0xffff
+        brg .defragm_global__found r2 0x7fff
+        mov r1 r2
+        jmp .defragm_global__loop1
+    .defragm_global__found
+        and r2 r2 0x7fff
+        lod r3 r2
+        brg .defragm_global__found2 r3 0x7fff
+        mov r1 r2
+        jmp .defragm_global__loop1
+    .defragm_global__found2
+        str r1 r3
+        str r2 0
+        jmp .defragm_global__loop1
+    .defragm_global__end
+        pop r3
+        pop r2
+        pop r1
+        ret

@@ -1,0 +1,108 @@
+minreg 5
+minheap 2048
+bits 16
+minstack 64
+@define programstart 32768 // replace with amount of reserved memory
+@define programend r3
+@define bf_pc r4
+@define currchar r5
+
+
+cal .interpret_bf
+
+hlt
+
+
+.interpret_bf
+cal .loadInputToMem
+imm bf_pc programend
+.interpretloop
+lod currchar bf_pc
+bre .incPtr currchar '>'
+bre .decPtr currchar '<'
+bre .incMem currchar '+'
+bre .decMem currchar '-'
+bre .printPtr currchar '.'
+bre .inputPtr currchar ','
+jmp 4
+
+
+.incPtr
+inc r1 r1
+inc bf_pc bf_pc
+jmp .interpretloop
+
+.decPtr
+dec r1 r1
+cal .checkPointerSafety
+inc bf_pc bf_pc
+jmp .interpretloop
+
+.incMem
+lod r2 r1
+inc r2 r2
+str r1 r2
+inc bf_pc bf_pc
+jmp .interpretloop
+
+.decMem
+lod r2 r1
+dec r2 r2
+str r1 r2
+inc bf_pc bf_pc
+jmp .interpretloop
+
+.printPtr
+lod r2 r1
+out %text r2
+inc bf_pc bf_pc
+ret
+
+.inputPtr
+in r2 %text
+str r1 r2
+inc bf_pc bf_pc
+ret
+
+
+.checkPointerSafety
+ble .printsegfault r1 programend
+ret
+.printsegfault
+out %text 'S'
+out %text 'e'
+out %text 'g'
+out %text 'm'
+out %text 'e'
+out %text 'n'
+out %text 't'
+out %text 'a'
+out %text 't'
+out %text 'i'
+out %text 'o'
+out %text 'n'
+out %text ' '
+out %text 'f'
+out %text 'a'
+out %text 'u'
+out %text 'l'
+out %text 't'
+out %text '.'
+hlt
+
+
+
+
+.loadInputToMem
+imm r1 programstart
+.loadmemloop
+in r2 %text
+bnz .notzero r2
+str r1 0
+inc r1 r1
+imm programend r1
+jmp .interpretloop
+.notzero
+str r1 r2
+inc r1 r1
+jmp .loadmemloop

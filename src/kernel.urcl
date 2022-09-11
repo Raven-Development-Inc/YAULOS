@@ -1,0 +1,158 @@
+// Kernel for URCLOS 1.0.0 Alpha - 1.2.0(1.2 and after = massive overhual)
+
+// Assembly headers
+BITS == 16
+MINREGS 8
+MINHEAP 4096
+MINSTACK 256
+MINRAM 65536
+
+//OS Vars
+.Bits
+	dw @bits
+.MinRegs
+	dw @minregs
+.MinStack
+	dw @minstack
+.MinHeap
+	dw @minheap
+
+.Syscalls //9 sys calls so far, planning on expanding the fs
+	dw .os_get_api_version //1
+	dw .os_get_raven_version //2
+	dw .os_error //3
+	dw .os_change_page //4
+	dw .os_peek //5
+	dw .os_poke //6
+	dw .os_create_file //7
+	dw .os_delete_file //8
+	dw .os_format_disk //9
+// Code
+.Init
+	cal .init_malloc
+	cal .os_get_raven_version
+	jmp .Init //infinite loop, not done yet
+	
+// Some syscalls ------------------------------------------------------------
+
+//Misc
+.os_get_raven_version //Print RavenOS Version
+	imm r1 .version1
+	psh .version2
+	cal printf
+	ret
+.os_get_api_version //Prints API version
+	imm r1, api_version
+	cal printf
+	ret
+.os_error //Error code goes in .errorCode use llod to change it(is an int bc memory constraints)
+	psh r1
+	imm r1 .errorCode
+	out %uint r1
+	pop r1
+	ret
+
+//Disk
+
+.os_peek //IN: r1 = address OUT: r2 = data
+	out %address r1
+	in r2 %BUS
+	ret
+.os_poke //IN: r1 = address r2 = data OUT: none
+	out %address r1
+	out %bus r2
+	ret
+.os_change_page //IN: r1 = page num(8192 byte pages)
+	out %page r1
+	ret
+	
+// SimplexFS
+.os_format_disk //only call this once
+	// oh shit, gonna be a lot of imms and incs and cal os_pokes
+	imm r1 0
+	cal .os_change_page
+	imm r1 0 //first 8k page
+	
+	//load the magic number in simplex
+	imm r2 0xfe 
+	cal .os_poke 
+	inc r1 r1
+	imm r2 0xca
+	cal .os_poke
+	inc r1 r1
+	imm r2 0x01
+	cal .os_poke
+	inc r1 r1
+	imm r2 0x32
+	cal .os_poke
+	inc r1 r1 
+	imm r2 0x94
+	cal .os_poke
+	inc r1 r1
+	
+	//ok, now load the number of sectors, remember, 256 byte sectors this header just BARELY fits in 256 bytes(254 bytes)
+	//so, 2^24/256 = 65536, great! just one imm, actually 2 bcause length of 2 
+	imm r2 0xffff
+	cal .os_poke
+	inc r1 r1 
+	imm r2 0x0000
+	cal .os_poke
+	inc r1 r1
+	//also, fuck the user, the checksum headers aren't a thing, so the header is actually
+	//smaller
+	
+	//FAT size(as in the size of the table) in 16 bit entries(0x0000 means the sector is
+	//unallocated, 0xffff means it is)
+	imm r2 0xffff //(65535 bytes or 8 files holy shit thats big, but thats only 8 files
+	//in a pool of 2048 files so idgaf)
+	cal .os_poke
+	inc r1 r1
+	imm r2 0x0000 //padding
+	cal .os_poke
+	inc r1 r1s
+	
+	//FAT size in sectors
+	//65536/256 = 256
+	//so...
+	imm r2 0x00ff
+	cal .os_poke
+	inc r1 r1
+	imm r2 0x0000 //more padding(mind you this fs is designed for 8 bit embeded systems
+	//so a 16 bit value would be separated into 2 8 bit values)
+	cal .os_poke
+	inc r1 r1
+	
+	//sector indes of root dir(it is 258)
+	imm r2 258 //idk the hex for 258 and am too lazy to search it up
+	cal .os_poke
+	inc r1 r1 
+	imm r2 0x0000 //WHY SO MUCH PADDING YOU SU-
+	cal .os_poke
+	inc r1 r1 
+	
+	//version of simplex: 1.0
+	imm r2 0x0100
+	cal .os_poke
+	inc r1 r1 
+	imm r2 0x0000
+	cal .os_poke
+	inc r1 r1 
+	
+	ret
+.os_create_file
+	ret
+.os_delete_file
+	ret
+
+// --------------------------------------------------------------------------
+
+
+// OS variables
+.version1 //pls dont change
+	dw ["RavenOS Version %s" 0xa0 0]
+.version2 //pls dont change
+	dw ["0.1.1 alpha" 0]
+.api_version //pls dont change
+	dw ["1" 0]
+.errorCode //change with llod
+	dw 0

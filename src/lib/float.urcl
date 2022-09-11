@@ -1,0 +1,646 @@
+// FLOAT IMPLEMENTATION: 
+// SXXXXXMMMMMMMMMM
+
+//create a float
+.float_construct
+    psh r1 // main int
+    psh r2 // v
+    psh r3 // sig 
+    psh r4 // e
+    brl .float_construct__else1 r1 0x8000
+    and r2 r1 0x7fff
+    imm r3 1
+    jmp .float_construct__else1_conti
+    .float_construct__else1
+        mov r2 r1
+    .float_construct__else1_conti
+    bre .float_construct_end_0 r2 0
+    imm r4 25
+    bge .while_v_over2048 r2 2048
+    jmp .while_v_less1024
+    .while_v_over2048
+        rsh r2 r2
+        inc r4 r4
+        bge .while_v_over2048 r2 2048
+    .while_v_less1024pre
+    brl .while_v_less1024 r2 1024
+    jmp .while_end
+    .while_v_less1024
+    lsh r2 r2
+    dec r4 r4
+    brl .while_v_less1024 r2 1024
+    .while_end
+    bge .e_over_31 r4 31
+    bsl r3 r3 15
+    bsl r4 r4 10
+    and r2 r2 1023
+    or r2 r2 r3
+    or r2 r2 r4
+    mov r1 r2
+    pop r4
+    pop r3
+    pop r2
+    pop r9
+    ret
+    .e_over_31
+    bsl r3 r3 15
+    and r3 r3 0x8000
+    or r3 r3 0x7c00
+    mov r1 r3
+    pop r4
+    pop r3
+    pop r2
+    pop r9
+    ret
+    .float_construct_end_0
+        pop r4
+        pop r3
+        pop r2
+        pop r1
+        imm r1 0
+        ret
+//create f16 from short
+.f16_from_short
+		psh r1
+		psh r2
+		psh r3
+		psh r4
+		brg .f16_from_int__if1_else r3 0 
+		sub r2 0 r1
+		imm r3 1
+		jmp .f16_from_int__if1_end
+	.f16_from_int__if1_else
+		mov r2 r1
+	.f16_from_int__if1_end
+		bre .f16_from_int__end0 r2 0
+		imm r4 25
+		brl .f16_from_int__while1_end r2 2048
+	.f16_from_int__while1_start
+		rsh r2 r2
+		inc r4 r4
+		bge .f16_from_int__while1_start r2 2048
+	.f16_from_int__while1_end
+		bge .f16_from_int__while2_end r2 1024
+	.f16_from_int__while2_start
+		lsh r2 r2
+		dec r4 r4
+		brl .f16_from_int__while2_start r2 1024
+	.f16_from_int__while2_end
+		bge .f16_from_int__if2 r4 31
+		bsl r3 r3 15
+		bsl r4 r4 10
+		and r2 r2 1023
+		or r2 r2 r3
+		or r2 r2 r4
+		mov r1 r2
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_from_int__if2
+		bsl r3 r3 15
+		and r3 r3 0x8000
+		or r3 r3 0x7c00
+		mov r1 r3
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_from_int__end0
+		pop r4
+		pop r3
+		pop r2
+		pop r1
+		imm r1 0
+		ret
+
+// convert float 16 to int
+.f16_to_int
+	psh r1 
+	psh r2 
+	psh r3
+	psh r4 
+	and r2 r1 1023 
+	and r4 r1 0x7c00 
+	setne r4 r4 0 
+	and r4 r4 1 
+	mlt r4 r4 1024 
+	or r4 r4 r2
+	and r2 r1 0x7c00
+	bsr r2 r2 10
+	sub r2 r2 25
+	sbrl .f16_to_int__if1_else r2 0
+	bre .f16_to_int__if1_end r2 0
+	bsl r4 r4 r2
+	jmp .f16_to_int__if1_end
+	.f16_to_int__if1_else
+	sub r2 0 r2
+	bsr r4 r4 r2
+	.f16_to_int__if1_end
+	and r1 r1 0x8000
+	brz .f16_to_int__end r1
+	sub r4 0 r4
+	.f16_to_int__end
+	mov r1 r4
+	pop r4
+	pop r3
+	pop r2
+	pop r9
+	ret
+
+.f16_add 
+	psh r1 // a
+	psh r2 // b 
+	psh r3 // sign 
+	psh r4 
+	psh r5 
+	psh r6 
+	psh r7 
+	psh r8
+	xor r3 r2 r1 
+	and r3 r3 0x8000
+	bre .f16_add__if1_end r3 0
+	cal .f16_sub
+	pop r8
+	pop r7
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r9
+	ret
+	.f16_add__if1_end
+		and r3 r1 0x8000
+		and r1 r1 0x7fff
+		and r2 r2 0x7fff
+		bge .f16_add__if2_end r1 r2
+		mov r4 r1
+		mov r1 r2
+		mov r2 r4
+	.f16_add__if2_end
+		setl r4 r1 0x7c00 
+		setl r5 r2 0x7c00 
+		and r4 r4 1 
+		and r5 r5 1 
+		or r4 r4 r5  
+		bnz .f16_add__if3_end r4
+		setg r4 r1 0x7c00 
+		setg r5 r2 0x7c00 
+		and r4 r4 1 
+		and r5 r5 1 
+		or r4 r4 r5 
+		bnz .f16_add__if4_end r4
+		imm r1 0x7fff
+	.f16_add__if4_end 
+		or r1 0x7c00 r3
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_add__if3_end
+		and r4 r1 0x7c00 
+		and r5 r2 0x7c00
+		sub r6 r4 r5
+		mov r7 r4
+		brz .f16_add__if5_else r6
+		bsr r8 r6 10
+		brz .f16_add__if6_else r5
+		and r2 r2 1023 
+		or r2 r2 1024 
+		bsr r2 r2 r8 
+		jmp .f16_add__if6_end
+	.f16_add__if6_else
+		dec r8 r8 
+		bsr r2 r2 r8 
+	.f16_add__if6_end
+		jmp .f16_add__if5_end
+	.f16_add__if5_else
+		bnz .f16_add__if7_else r5
+		add r1 r1 r2 
+		or r1 r1 r3
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+		jmp .f16_add__if7_end
+	.f16_add__if7_else
+		and r2 r2 1023 
+		or r2 r2 1024
+	.f16_add__if7_end
+		.f16_add__if5_end
+			add r4 r1 r2
+			and r5 r4 0x7c00 
+			bre .f16_add__if8_end r7 r5
+			and r6 r1 1023 
+			or r6 r6 1024
+			add r8 r6 r2 
+			rsh r8 r8
+			add r7 r7 0x400 
+			and r8 r8 1023 
+			or r4 r7 r8
+			.f16_add__if8_end
+				brl .f16_add__if9_end r4 0x7c00 
+				or r1 r3 0x7c00 
+				pop r8
+				pop r7
+				pop r6
+				pop r5
+				pop r4
+				pop r3
+				pop r2
+				pop r9
+				ret
+	.f16_add__if9_end
+		or r1 r4 r3
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+
+.f16_sub
+	psh r1 // a
+	psh r2 // b 
+	psh r3 // sign 
+	psh r4 
+	psh r5 
+	psh r6 
+	psh r7 
+	psh r8
+	psh r9
+	xor r3 r1 r2 // a ^ b
+	and r3 r3 0x8000  // (a^b) & 0x8000
+	brz .f16_sub__if1_end r3 // if((a^b)&0x8000 != 0) {
+	xor r2 r2 0x8000
+	cal .f16_add // return f16_add(a, b ^ 0x8000);
+	pop r9
+	pop r8
+	pop r7
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r9
+	ret
+	.f16_sub__if1_end // } 
+		and r3 r1 0x8000 // sign = a & 0x8000
+		lsh r1 r1 // a = a << 1 
+		lsh r2 r2 // b = b << 1
+		bge .f16_sub__if2_end r1 r2 // if(a < b) {
+		mov r4 r1 // swap values and sign
+		mov r1 r2
+		mov r2 r4
+		xor r3 r3 0x8000
+	.f16_sub__if2_end // }
+		and r5 r1 0xf800 // ax = a & 0xf800
+		and r6 r2 0xf800 // bx = b & 0xf800
+		setge r7 r1 0xf800 // is a >= 0xf800 ?
+		setge r8 r2 0xf800 // is b >= 0xf800 ?
+		or r7 r7 r8 // (a >= 0xf800 || b >= 0xf800) ?
+		and r7 r7 1 // bool(a >= 0xf800 || b >= 0xf800)
+		brz .f16_sub__if3_end r7 // if(a >= 0xf800 || b >= 0xf800) {
+		setg r7 r1 0xf800 // is a > 0xf800 ?
+		setg r8 r2 0xf800 // is b > 0xf800 ?
+		sete r9 r1 r2     // is a == b?
+		or r7 r8 r7       // (a > 0xf800 || b > 0xf800) ?
+		or r7 r7 r9       // (a > 0xf800 || b > 0xf800 || a == b) ?
+		and r7 r7 1       // bool(a > 0xf800 || b > 0xf800 || a == b)
+		brz .f16_sub__if4_end r7 // if(a > 0xf800 || b > 0xf800 || a == b) {
+		imm r1 0x7fff // return 0x7fff;
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_sub__if4_end // }
+		or r7 r3 0x7c00   //res = sign | 0x7c00
+		bne .f16_sub__if5_else r1 0xf800 // if(a == 0xf800) {
+		mov r1 r7 // return res
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_sub__if5_else // } else {
+		xor r1 r7 0x8000 // return res ^ 0x8000;
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_sub__if3_end // } 
+		sub r7 r5 r6 // exp_diff = ax - bx;
+		mov r8 r5 // exp_part = ax;
+		bre .f16_sub__if6_else r7 0 // if(exp_diff != 0) {
+		bsr r9 r7 11                // shift = exp_diff >> 11;
+		bre .f16_sub__if7_else r6 0 // if (bx != 0) {   
+		and r2 r2 2047              // b &= 2047
+		or r2 r2 2048               // b |= 2048
+		bsr r2 r2 r9                // b >>= shift
+		jmp .f16_sub__if7_end       // }
+	.f16_sub__if7_else          // else {
+		dec r9 r9                   // shift -=1 
+		bsr r2 r2 r9                // b >>= shift-1
+	.f16_sub__if7_end           // }
+		jmp .f16_sub__if6_end       // }
+	.f16_sub__if6_else          // else {
+		bne .f16_sub__if8_else r6 0 // if(bx == 0) {
+		sub r9 r1 r2                // res = a - b
+		rsh r9 r9                   // res >>= 1 ; res = (a-b)>>1;
+		bne .f16_sub__if9_end r9 0 // if(res == 0) {
+		mov r1 r9                   // return res;
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_sub__if9_end // }
+		or r1 r9 r3     // return res | sign;
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_sub__if8_else // } else {
+		and r2 r2 2047 // b &= 2047
+		or r2 r2 2048  // b |= 2048
+	.f16_sub__if8_end // }
+		.f16_sub__if6_end // }
+			sub r9 r1 r2    // 
+			and r7 r9 0xf800 
+			bne .f16_sub__if11_end r7 r8
+			rsh r9 r9 
+			or r1 r9 r3
+			pop r9
+			pop r8
+			pop r7
+			pop r6
+			pop r5
+			pop r4
+			pop r3
+			pop r2
+			pop r9
+			ret
+	.f16_sub__if11_end
+		and r5 r1 2047 
+		or r5 r5 2048
+		sub r6 r5 r2
+		bne .f16_sub__if10_end r6 0
+		imm r1 0
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_sub__if10_end
+		.f16_sub__while1 
+		setne r5 r8 0 
+		and r7 r6 2048 
+		sete r7 r7 0
+		and r5 r5 r7
+		and r5 r5 1
+		brz .f16_sub__while1_end r5
+		sub r8 r8 0x800
+		bre .f16_sub__while1 r8 0
+		lsh r6 r6 
+		jmp .f16_sub__while1
+	.f16_sub__while1_end
+		and r1 r6 2047 
+		or r1 r1 r8 
+		rsh r1 r1 
+		or r1 r1 r3
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+
+.f16_mul 
+	psh r1 
+	psh r2 
+	psh r3 
+	psh r4 
+	psh r5 
+	psh r6 
+	psh r7 
+	psh r8
+	xor r3 r2 r1 
+	and r3 r3 0x8000 
+	and r4 r1 0x8000 
+	sete r4 r4 0x8000 
+	and r4 r4 1 
+	and r5 r2 0x8000 
+	sete r5 r5 0x8000 
+	and r5 r5 1 
+	or r4 r4 r5 
+	brz .f16_mul__if1_end r4
+	and r4 r1 0x7fff 
+	setg r4 r4 0x7c00 
+	and r4 r4 1 
+	and r5 r2 0x7fff 
+	setg r5 r5 0x7c00 
+	and r5 r5 1 
+	or r4 r4 r5 
+	brz .f16_mul__if2_end r4
+	imm r1 0x7fff
+	pop r8
+	pop r7
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r9
+	ret
+	.f16_mul__if2_end
+		or r1 r3 0x7c00
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_mul__if1_end
+		and r4 r1 0x7fff 
+		sete r4 r4 0 
+		and r4 r4 1 
+		and r5 r2 0x7fff 
+		sete r5 r5 0 
+		and r5 r5 1 
+		or r4 r4 r5
+		brz .f16_mul__if3_end r4
+		imm r1 0
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_mul__if3_end
+		and r4 r1 0x7c00 
+		setne r4 r4 0 
+		and r4 r4 1 
+		mlt r4 r4 1024 
+		and r5 r1 1023 
+		or r4 r4 r5
+		and r5 r2 0x7c00 
+		setne r5 r5 0 
+		and r5 r5 1 
+		mlt r5 r5 1024 
+		and r6 r2 1023 
+		or r5 r5 r6
+		mlt r8 r4 r5 
+		umlt r7 r4 r5
+		mov r4 r8
+		and r5 r1 0x7c00 
+		bsr r5 r5 10 
+		sete r6 r5 0 
+		and r6 r6 1 
+		add r5 r5 r6
+		and r6 r2 0x7c00 
+		bsr r6 r6 10 
+		sete r8 r6 0 
+		and r8 r8 1 
+		add r6 r6 r8
+		add r5 r5 r6 
+		sub r5 r5 15
+		and r8 r8 0b10000 
+		bre .f16_mul__if4_elseif r8 0 
+		psh r7 
+		bsr r7 r7 11 
+		bsr r4 r4 11 
+		pop r8 
+		bsl r8 r8 5 
+		or r4 r4 r8
+		inc r5 r5
+		jmp .f16_mul__if4_end
+	.f16_mul__if4_elseif
+		and r8 r7 0b1000 
+		bre .f16_mul__if4_else r8 0
+		psh r7
+		psh r7 
+		bsr r7 r7 10 
+		bsr r4 r4 10 
+		pop r8
+		pop r7  
+		bsl r8 r8 6 
+		or r4 r4 r8
+		jmp .f16_mul__if4_end
+	.f16_mul__if4_else
+		sub r5 r5 10
+	.f16_mul__while1 
+		setge r1 r4 2048 
+		and r1 r1 1 
+		setne r2 r7 0
+		and r2 r2 1
+		or r1 r1 r2
+		brz .f16_mul__while1_end r1
+		psh r7
+		bsr r7 r7 1 
+		bsr r4 r4 1 
+		pop r8
+		bsl r8 r8 15 
+		or r4 r4 r8
+		inc r5 r5
+		jmp .f16_mul__while1
+	.f16_mul__while1_end
+		.f16_mul__if4_end
+			sbrg .f16_mul__if5_elseif r5 0
+			neg r5 r5 
+			inc r5 r5 
+			psh r7 
+			psh r7
+			bsr r7 r7 r5 
+			bsr r4 r4 r5 
+			sub r5 16 r5 
+			pop r8
+			pop r7 
+			bsl r8 r8 r5 
+			or r4 r4 r8 
+			imm r5 0 
+	.f16_mul__if5_elseif
+		brl .f16_mul__if5_end r5 31
+		and r1 r3 0x8000 
+		or r1 r1 0x7c00
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_mul__if5_end
+		bsl r1 r5 10 
+		and r4 r4 1023 
+		or r1 r1 r4 
+		or r1 r1 r3
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret

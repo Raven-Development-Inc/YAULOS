@@ -1,0 +1,76 @@
+bits == 16
+
+.print_str
+    // input data: r1 -> char*
+    psh r1
+    psh r2 // reserve reg
+    imm r2 0
+    .print_str__loop1
+        lod r2 r1
+        bre .print_str__endp r2 0
+        out %text r2
+        inc r1 r1
+        jmp .print_str__loop1
+    .print_str__endp
+        pop r2
+        pop r1
+        ret
+
+.printf // r1 = char*
+    pop r9 // ret*
+    str 0xee0 r1 
+    str 0xee1 r2
+    str 0xee2 r3
+    imm r2 0
+    .printf__loop1
+        lod r2 r1
+        bre .printf_str__endp r2 0
+        bre .printf__perc r2 '%'
+        out %text r2
+        inc r1 r1
+        jmp .printf__loop1
+    .printf__perc
+        inc r1 r1
+        lod r2 r1
+        bre .printf__percsub__d r2 'd'
+        bre .printf__percsub__s r2 's'
+        bre .printf__percsub__c r2 'c'
+        bre .printf__percsub__perc r2 '%'
+        jmp .printf__percsub__err
+    .printf__percsub__perc
+        out %text '%'
+        inc r1 r1
+        jmp .printf__loop1
+    .printf__percsub__d
+        pop r3
+        out %numb r3
+        inc r1 r1
+        jmp .printf__loop1
+    .printf__percsub__c
+        pop r3
+        out %text r3
+        inc r1 r1
+        jmp .printf__loop1
+    .printf__percsub__s
+        pop r3
+        str 0xee3 r1
+        mov r1 r3
+        cal .print_str
+        lod r1 0xee3
+        inc r1 r1
+        jmp .printf__loop1
+    .printf__percsub__err
+        imm r1 .printf__percsub__err_str
+        psh r2
+        cal .printf
+    .printf_str__endp
+        lod r3 0xee2
+        lod r2 0xee1
+        lod r1 0xee0
+        jmp r9
+    .printf__percsub__err_str
+        dw [ "Wrong percentage-value %c" 0 ]
+
+.print_int //int goes in r1
+	out %int r1
+	ret
