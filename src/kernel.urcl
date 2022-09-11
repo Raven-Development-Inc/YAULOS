@@ -133,6 +133,10 @@ MINRAM 65536
 	//version of simplex: 1.0
 	imm r2 0x0100
 	cal .os_poke
+	inc r1 r1 
+	imm r2 0x0000
+	cal .os_poke
+	inc r1 r1 
 	
 	ret
 .os_create_file
