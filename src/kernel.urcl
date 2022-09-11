@@ -69,9 +69,15 @@ MINRAM 65536
 // SimplexFS
 .os_format_disk //only call this once
 	// oh shit, gonna be a lot of imms and incs and cal os_pokes
+	
+	.e
+		dw ["Setting up SimplexFS please be patient" 0] //tell the user wtf we are doing
+	imm r1 .e
+	cal .printf
 	imm r1 0
+	
 	cal .os_change_page
-	imm r1 0 //first 8k page
+	imm r1 0 //first 64k page
 	
 	//load the magic number in simplex
 	imm r2 0xfe 
@@ -137,6 +143,15 @@ MINRAM 65536
 	imm r2 0x0000
 	cal .os_poke
 	inc r1 r1 
+	
+	//media type: generic or 0x00
+	imm r2 0x0000
+	cal .os_poke
+	inc r1 r1 
+	
+	//sxh_id: none, just fill teh fucking void
+	
+	
 	
 	ret
 .os_create_file
