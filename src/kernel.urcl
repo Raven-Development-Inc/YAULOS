@@ -149,7 +149,7 @@ MINRAM 65536
 	cal .os_poke
 	inc r1 r1 
 	
-	//sxh_id: none, just fill teh fucking void
+	//sxh_id: none, just fill the fucking void
 	
 	
 	
