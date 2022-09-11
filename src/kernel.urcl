@@ -69,9 +69,20 @@ MINRAM 65536
 // SimplexFS
 //per file and so on and so on
 .os_format_disk //only call this once
+	// oh shit, gonna be a lot of imms and incs and cal os_pokes
 	imm r1 0
 	cal .os_change_page
-	imm r1 
+	imm r1 0
+	imm r2 0xfe //load the magic number in simplex
+	cal os_poke 
+	inc r1 r1
+	imm r2 0xca
+	cal os_poke
+	inc r1 r1
+	imm r2 0x01
+	cal os_poke
+	inc r1 r1 
+	
 	ret
 .os_create_file
 	ret
