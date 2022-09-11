@@ -68,7 +68,10 @@ MINRAM 65536
 	
 // SimplexFS
 //per file and so on and so on
-.os_format_disk
+.os_format_disk //only call this once
+	imm r1 0
+	cal .os_change_page
+	imm r1 
 	ret
 .os_create_file
 	ret
