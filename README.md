@@ -2,6 +2,7 @@
 The Universal Computer OS is an operating system directed at all 16 bit URCL-compatible systems
 
 ## Current Project: Brainfuck Interpreter
+TODO: Loops
 
 # Specs
 - Language: URCL, Brainfuck, Maybe in the future some Hexagn and Ember/Krimson, a bit of ACRISS and Armstrong
