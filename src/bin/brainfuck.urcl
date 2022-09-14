@@ -1,8 +1,8 @@
 minreg 5
 minheap 16348
-bits 32
-minstack 32
-@define programstart 0 // replace with amount of reserved memory
+bits 16
+minstack 256
+@define programstart 32768 // replace with amount of reserved memory
 @define programend r3
 @define bf_pc r4
 @define currchar r5
