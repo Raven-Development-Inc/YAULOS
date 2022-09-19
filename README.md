@@ -1,8 +1,8 @@
 # Universal Computer Operating System (UCOS)
 The Universal Computer OS is an operating system directed at all 16 bit URCL-compatible systems
 
-## Current Project: Brainfuck Interpreter & basic Forth interpreter/compiler & FS
-Brainfuck TODO: Loops
+## Current Project: Basic Forth interpreter/compiler & FS
+Brainfuck TODO: Loops(DONE)
 Forth TODO: create forth primitives in URCL
 FS TODO: finish FS header, creating and deleting files
 
