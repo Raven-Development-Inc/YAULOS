@@ -255,6 +255,10 @@ MINRAM 65536
 	cal .printf
 	pop r1
 	
+	//root len
+	imm r2 0
+	cal .os_poke
+	
 	ret
 .os_create_file
 	ret
