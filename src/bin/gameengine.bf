@@ -1,19 +1,9 @@
-BRAINFUCK GAME DESIGNER DELUXE 2020
-
-This is a tool for creating simple text based quiz style games in brainfuck
-
-INSTRUCTIONS
 
 
-1 Type in the opening text for your game (Situation your character is in and options) and type "#"
-2 Type in the outcome for if the player types "n" then type "#"
-3 Then type the outcome for if the player types "y"
-4 Run the program and copy the code for your game
-5 Paste the code for your game and enjoy
 
-If you want to stack the code to make bigger games
-you have to type " " as the opening text for the second chunk of code
-and then paste it under the other code that was generated
+
+
+
 
 
 >>>>+>+++++++++++++++++++++++++++++++++++++++++++
@@ -25,8 +15,8 @@ and then paste it under the other code that was generated
 
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 >
+
 ----[---->+<]>-..........--[->+++++<]>.+[->++<]>+.-[--->++<]>..[->+++++<]>-.-[-->+++<]>-..[-->+++<]>--.-[-->+<]>--.++........................................................................>++++++++++.-[->+++++<]>..................................................[->++<]>+.-[-->+<]>--......................>++++++++++.+[->++++<]>-..................................................................................................++[->++<]>+.++[--->++<]>.[-->+++<]>--.-[-->+<]>.+[->++<]>+.
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>+>+++++++++++++++++++++++++++++++++++++++++++
