@@ -1,4 +1,5 @@
 //BrainFURCL Interpreter v6.0.0
+// TODO: Work out loop kinks
 minreg 5
 minheap 16348
 bits 16
