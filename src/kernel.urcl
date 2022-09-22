@@ -266,7 +266,14 @@ MINRAM 65536
 	ret
 .os_delete_file
 	ret
-
+.os_create_dir
+	ret
+.os_delete_dir
+	ret
+.os_change_dir
+	ret
+.os_print_wd
+	ret
 // --------------------------------------------------------------------------
 
 
