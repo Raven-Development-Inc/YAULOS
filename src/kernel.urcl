@@ -49,7 +49,7 @@ MINRAM 65536
 	.e13
 		dw ["Shell loaded, starting, enjoy session %d - User: %s" 0]
 
-.Syscalls //9 sys calls so far, planning on expanding the fs
+.Syscalls //13 sys calls so far, planning on expanding the fs
 	dw .os_get_api_version //1
 	dw .os_get_raven_version //2
 	dw .os_error //3
@@ -59,6 +59,10 @@ MINRAM 65536
 	dw .os_create_file //7
 	dw .os_delete_file //8
 	dw .os_format_disk //9
+	dw .os_create_dir //10
+	dw .os_delete_dir //11
+	dw .os_change_dir //12
+	dw .os_print_wd //13
 // Code
 .Init
 	cal .init_malloc
