@@ -17,6 +17,38 @@ MINRAM 65536
 .MinHeap
 	dw @minheap
 
+//stuff
+//damn, tones of RAM used
+	.e
+		dw ["Setting up SimplexFS please be patient" 0] //tell the user wtf we are doing
+	.e1
+		dw ["10% done" 0] //telling the user how much of the proccess is done
+		//because im nice
+	.e2
+		dw ["20% done" 0]
+	.e3 
+		dw ["30% done" 0]
+	.e4 
+		dw ["40% done" 0]
+	.e5 
+		dw ["50% done" 0]
+	.e6 
+		dw ["60% done" 0]
+	.e7 
+		dw ["70% done" 0]
+	.e8 
+		dw ["80% done" 0]
+	.e9
+		dw ["90% done" 0]
+	.e10
+		dw ["File system installed, creating root directory..." 0]
+	.e11
+		dw ["SimplexFS setup finished, loading programs from ROM..." 0]
+	.e12
+		dw ["Programs installed, loading shell.exe..." 0]
+	.e13
+		dw ["Shell loaded, starting, enjoy session %d - User: %s" 0]
+
 .Syscalls //9 sys calls so far, planning on expanding the fs
 	dw .os_get_api_version //1
 	dw .os_get_raven_version //2
@@ -72,36 +104,6 @@ MINRAM 65536
 .os_format_disk //only call this once
 	// oh crap, gonna be a lot of imms and incs and cal os_pokes
 	
-	//damn, tones of RAM used
-	.e
-		dw ["Setting up SimplexFS please be patient" 0] //tell the user wtf we are doing
-	.e1
-		dw ["10% done" 0] //telling the user how much of the proccess is done
-		//because im nice
-	.e2
-		dw ["20% done" 0]
-	.e3 
-		dw ["30% done" 0]
-	.e4 
-		dw ["40% done" 0]
-	.e5 
-		dw ["50% done" 0]
-	.e6 
-		dw ["60% done" 0]
-	.e7 
-		dw ["70% done" 0]
-	.e8 
-		dw ["80% done" 0]
-	.e9
-		dw ["90% done" 0]
-	.e10
-		dw ["File system installed, creating root directory..." 0]
-	.e11
-		dw ["SimplexFS setup finished, loading programs from ROM..." 0]
-	.e12
-		dw ["Programs installed, loading shell.exe..." 0]
-	.e13
-		dw ["Shell loaded, starting, enjoy session %d - User: %s" 0]
 	imm r1 .e
 	cal .printf
 	imm r1 0
