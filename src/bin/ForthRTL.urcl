@@ -38,7 +38,7 @@ minram 32768
     mov SP topofram
     cal .pop
     mov SP R7
-    cal .push
+    cal .push 
     ret
     
 .rotl //idk even more if this works
