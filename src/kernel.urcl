@@ -63,7 +63,7 @@ MINRAM 65536
 	.e13
 		dw ["Shell loaded, starting, enjoy session %d - User: %s" 0]
 
-.Syscalls //13 sys calls so far, planning on expanding the fs
+.Syscalls //13 sys calls so far, expanding the fs right now
 	dw .os_get_api_version //1
 	dw .os_get_raven_version //2
 	dw .os_error //3
