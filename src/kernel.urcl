@@ -13,6 +13,42 @@ MINRAM 65536
 .Process_Descriptor_table
     DW [ 0 0 0 0 0 0 0 0 0 0 ] //0xff = taken up, 0x00 = free
 
+// IL interpreter cause more func & portable
+.InstructionTable
+    
+    
+// Instructions
+
+.Instruction_Halt
+    // WIP
+    // Main thing it will do is close process, free process memory and remove its stdout stream
+    HLT
+
+.Instruction_Add
+    // Inputs are: Op 1 = R2, Op 2 = R3 and so on
+    LLOD R3 R3 .VirtualRegisters
+    LLOD R4 R4 .VirtualRegisters
+    ADD R8 R3 R4 // temp = op2 + op3
+    LSTR R2 .VirtualRegisters R8
+    RET
+
+.Instruction_Rsh
+    ret
+.Instruction_Str
+    hlt
+.Instruction_Lod
+
+    hlt
+.Instruction_Nor
+    hlt
+.Instruction_Out
+    hlt
+.Instruction_In
+    hlt
+    
+    
+    
+
 //define values
 @define diskstart 258
 
