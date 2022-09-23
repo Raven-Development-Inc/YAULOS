@@ -25,9 +25,11 @@ MINRAM 65536
 	dw @minstack
 .MinHeap
 	dw @minheap
+.MinRam
+        dw @minram
 
 //stuff
-//damn, tones of RAM used
+//damn, tons of RAM used
 	.e
 		dw ["Setting up SimplexFS please be patient" 0] //tell the user wtf we are doing
 	.e1
@@ -287,6 +289,8 @@ MINRAM 65536
 	ret
 .os_print_wd
 	ret
+.os_write_file
+        ret
 // --------------------------------------------------------------------------
 
 
