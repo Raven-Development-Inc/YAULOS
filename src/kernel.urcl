@@ -1,4 +1,4 @@
-// UCOS 0.1.4
+// UCOS 0.1.5
 
 // Assembly headers
 BITS == 16
@@ -27,6 +27,9 @@ MINRAM 65536
 	dw @minheap
 .MinRam
         dw @minram
+
+.currentDirectory
+        dw 0 //root dir
 
 //stuff
 //damn, tons of RAM used
