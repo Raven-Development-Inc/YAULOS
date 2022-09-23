@@ -289,6 +289,7 @@ MINRAM 65536
 .os_delete_dir
 	ret
 .os_change_dir
+	lstr .currentDirectory r1 0
 	ret
 .os_print_wd
 	lod r1 .currentDirectory
