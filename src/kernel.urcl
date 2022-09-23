@@ -7,6 +7,9 @@ MINHEAP 4096
 MINSTACK 1024 //a lot of stack for sbpc
 MINRAM 65536
 
+//define values
+@define diskstart 258
+
 //OS Vars
 .Bits
 	dw @bits
