@@ -292,7 +292,7 @@ MINRAM 65536
 	ret
 .os_print_wd
 	lod r1 .currentDirectory
-	cal .printInt
+	cal .print_int
 	ret
 .os_write_file
         ret
