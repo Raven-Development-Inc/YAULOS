@@ -65,7 +65,7 @@ MINRAM 65536
 
 .Syscalls //13 sys calls so far, expanding the fs right now
 	dw .os_get_api_version //1
-	dw .os_get_raven_version //2
+	dw .os_get_ucos_version //2
 	dw .os_error //3
 	dw .os_change_page //4
 	dw .os_peek //5
@@ -86,7 +86,7 @@ MINRAM 65536
 // Some syscalls ------------------------------------------------------------
 
 //Misc------------------------------------------------------------------------------------
-.os_get_raven_version //Print RavenOS Version
+.os_get_ucos_version //Print ucos Version
 	imm r1 .version1
 	psh .version2
 	cal printf
@@ -304,8 +304,8 @@ MINRAM 65536
 .version1 //pls dont change
 	dw ["RavenOS Version %s" 0xa0 0]
 .version2 //pls dont change
-	dw ["0.1.1 alpha" 0]
+	dw ["0.1.5 alpha" 0]
 .api_version //pls dont change
-	dw ["1" 0]
+	dw ["6" 0]
 .errorCode //change with llod
 	dw 0
