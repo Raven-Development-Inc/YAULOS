@@ -8,10 +8,10 @@ MINSTACK 1024 //a lot of stack for sbpc
 MINRAM 65536
 
 .VirtualRegisters
-    DW [ 0 0 0 0 0 0 0 0 0 0 ] // R0 - R9
+    DW [ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ] // R0 - R15
 
 .Process_Descriptor_table
-    DW [ 0 0 0 0 0 0 0 0 0 0 ] //0xff
+    DW [ 0 0 0 0 0 0 0 0 0 0 ] //0xff = taken up, 0x00 = free
 
 //define values
 @define diskstart 258
