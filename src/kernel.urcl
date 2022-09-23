@@ -29,7 +29,7 @@ MINRAM 65536
         dw @minram
 
 .currentDirectory
-        dw 0 //root dir
+        dw 0 //root dir = 0th dir current DIR is the Index of the directory
 
 //stuff
 //damn, tons of RAM used
