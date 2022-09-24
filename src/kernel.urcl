@@ -3,10 +3,10 @@
 
 // Assembly headers
 BITS == 16
-MINREGS 8
-MINHEAP 4096
-MINSTACK 1024 //a lot of stack for sbpc
-MINRAM 65536
+MINREGS 16
+MINHEAP 32768
+MINSTACK 2048 
+
 
 .VirtualRegisters
     DW [ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ] // R0 - R15
@@ -97,8 +97,6 @@ MINRAM 65536
 	dw @minstack
 .MinHeap
 	dw @minheap
-.MinRam
-        dw @minram
 
 .currentDirectory
         dw 0 //root dir = 0th dir current DIR is the Index of the directory
