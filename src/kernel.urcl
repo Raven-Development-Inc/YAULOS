@@ -39,15 +39,9 @@ MINRAM 65536
 	dw .In //same as IN in URCL
 	dw .Out //^^^
     
-// Instructions
-
-
+// Instructions: WIP
     
     
-    
-
-
-
 
 //define values
 @define diskstart 258
