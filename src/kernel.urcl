@@ -1,4 +1,4 @@
-// UCOS 0.1.4
+// UCOS 0.1.5
 
 // Assembly headers
 BITS == 16
@@ -79,9 +79,14 @@ MINRAM 65536
 	dw @minstack
 .MinHeap
 	dw @minheap
+.MinRam
+        dw @minram
+
+.currentDirectory
+        dw 0 //root dir = 0th dir current DIR is the Index of the directory
 
 //stuff
-//damn, tones of RAM used
+//damn, tons of RAM used
 	.e
 		dw ["Setting up SimplexFS please be patient" 0] //tell the user wtf we are doing
 	.e1
@@ -112,9 +117,9 @@ MINRAM 65536
 	.e13
 		dw ["Shell loaded, starting, enjoy session %d - User: %s" 0]
 
-.Syscalls //13 sys calls so far, planning on expanding the fs
+.Syscalls //13 sys calls so far, expanding the fs right now
 	dw .os_get_api_version //1
-	dw .os_get_raven_version //2
+	dw .os_get_ucos_version //2
 	dw .os_error //3
 	dw .os_change_page //4
 	dw .os_peek //5
@@ -135,7 +140,7 @@ MINRAM 65536
 // Some syscalls ------------------------------------------------------------
 
 //Misc------------------------------------------------------------------------------------
-.os_get_raven_version //Print RavenOS Version
+.os_get_ucos_version //Print ucos Version
 	imm r1 .version1
 	psh .version2
 	cal printf
@@ -338,9 +343,14 @@ MINRAM 65536
 .os_delete_dir
 	ret
 .os_change_dir
+	lstr .currentDirectory r1 0
 	ret
 .os_print_wd
+	lod r1 .currentDirectory
+	cal .print_int
 	ret
+.os_write_file
+        ret
 // --------------------------------------------------------------------------
 
 
@@ -348,8 +358,8 @@ MINRAM 65536
 .version1 //pls dont change
 	dw ["RavenOS Version %s" 0xa0 0]
 .version2 //pls dont change
-	dw ["0.1.1 alpha" 0]
+	dw ["0.1.5 alpha" 0]
 .api_version //pls dont change
-	dw ["1" 0]
+	dw ["6" 0]
 .errorCode //change with llod
 	dw 0
