@@ -12,7 +12,7 @@ MINSTACK 2048
     DW [ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ] // R0 - R15
 
 .Process_Descriptor_table //pointers to the proccess descripters
-    DW [ 0 0 0 0 0 0 0 0 0 0 ] //descriptor cannot be aa 0, because 0 = free
+    DW [ 0 0 0 0 0 0 0 0 0 0 ] //descriptor pointer cannot be a 0, because 0 = free
     
 //Procces descriptor format
 //PID: Any number not zero, zero is the OS
@@ -28,7 +28,7 @@ MINSTACK 2048
 	dw .Lod //load
 	dw .Str //store
 	dw .Bimm //bulk imm
-	dw .Calsys //Call sys
+	dw .Scal //Call syscall
 	dw .Goto //Goto fuction
 	dw .Gotoif //goto if .flag is true
 	dw .Less //set flag if less than
@@ -45,6 +45,8 @@ MINSTACK 2048
 	dw .Out //^^^
 	dw .Imm //immediately change RAM
 	dw .Nop //no operation
+	dw .Shl //shift left
+	dw .SHr //shift right
 	
     
 // Instructions: WIP
@@ -74,16 +76,65 @@ MINSTACK 2048
 	lstr .VirtualRegisters r5 r1
 	ret
 .Div
-	llod r1 .VirtualRegisters 0
-	llod r2 .VirtualRegisters 1
+	llod r1 .VirtualRegisters r3
+	llod r2 .VirtualRegisters r4
 	div r1 r1 r2
-	lstr .VirtualRegisters 0 r1
+	lstr .VirtualRegisters 0 r5
 	ret
 
-.Lod
-	llod r2 .VirtualRegisters 1
-	lod r1 r2
-	
+.Scal
+	bsl R2 R2 4
+	or R1 R1 R2
+	brg .Ins_SystemCall_InvalidSyscall R1 36
+	llod R1 R1 .SystemCalls
+	cal R1
+	CAL .ContextSwitch
+	RET
+
+.And
+	add R3 R3 .VirtualRegisters
+	add R2 R2 .VirtualRegisters
+	add R1 R1 .VirtualRegisters
+	lod R2 R2
+	lod R1 R1
+	and R1 R1 R2
+	str R3 R1
+	RET
+
+.Not
+	add R3 R3 .VirtualRegisters
+	add R2 R2 .VirtualRegisters
+	add R1 R1 .VirtualRegisters
+	lod R2 R2
+	lod R1 R1
+	not R1 R1 R2
+	str R3 R1
+	ret
+
+.Shl
+	add R3 R3 .VirtualRegisters
+	add R2 R2 .VirtualRegisters
+	add R1 R1 .VirtualRegisters
+	lod R2 R2
+	lod R1 R1
+	bsl R1 R2 R1
+	str R3 R1
+	ret
+
+.Shr
+	add R3 R3 .VirtualRegisters
+	add R2 R2 .VirtualRegisters
+	add R1 R1 .VirtualRegisters
+	lod R2 R2
+	lod R1 R1
+	bsr R1 R2 R1
+	str R3 R1
+	ret
+
+//Errors
+.Ins_SystemCall_InvalidSyscall
+	STR .OSVar_ERROR 6
+	RET
 
 //define values
 @define diskstart 258
@@ -175,11 +226,11 @@ MINSTACK 2048
 //Disk -----------------------------------------------------------------------------------
 
 .os_peek //IN: r1 = address OUT: r2 = data
-	out %address r1
+	out %addr r1
 	in r2 %BUS
 	ret
 .os_poke //IN: r1 = address r2 = data 
-	out %address r1
+	out %addr r1
 	out %bus r2
 	ret
 	
