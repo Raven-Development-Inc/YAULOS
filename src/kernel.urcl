@@ -12,7 +12,12 @@ MINRAM 65536
     DW [ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ] // R0 - R15
 
 .Process_Descriptor_table //pointers to the proccess descripters
-    DW [ 0 0 0 0 0 0 0 0 0 0 ] //0xff = taken up, 0x00 = free
+    DW [ 0 0 0 0 0 0 0 0 0 0 ] //descriptor cannot be aa 0, because 0 = free
+    
+//Procces descriptor format
+//PID: Any number not zero, zero is the OS
+//Name: Pointer to a string
+//
 
 // IL interpreter cause more func & portable
 .InstructionTable
@@ -39,9 +44,13 @@ MINRAM 65536
 	dw .In //same as IN in URCL
 	dw .Out //^^^
 	dw .Imm //immediately change RAM
+	dw .Nop //no operation
 	
     
 // Instructions: WIP
+.Nop
+	ret
+
 .Imm 
 	lstr .VirtualRegisters r2 r1
 	ret
