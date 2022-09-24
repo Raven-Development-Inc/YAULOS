@@ -15,7 +15,25 @@ MINRAM 65536
 
 // IL interpreter cause more func & portable
 .InstructionTable
-    
+	dw .Add //add
+	dw .Sub //subtract
+	dw .Mul //multiply
+	dw .Div //divide
+	dw .Lod //load
+	dw .Str //store
+	dw .Bimm //bulk imm
+	dw .Calsys //Call sys
+	dw .Goto //Goto fuction
+	dw .Gotoif //goto if .flag is true
+	dw .Less //set flag if less than
+	dw .Greater //set flag if greater than
+	dw .Equal //set flag if equal
+	dw .Not //Logical NOT
+	dw .And //Logical AND
+	dw .Or //Logical OR
+	dw .NotEqual //Not Equal
+	dw .NotGreater //Not Greater
+	dw .NotLess //Not Less
     
 // Instructions
 
