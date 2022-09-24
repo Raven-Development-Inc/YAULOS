@@ -45,6 +45,9 @@ MINRAM 65536
     
     
 
+
+
+
 //define values
 @define diskstart 258
 
@@ -140,13 +143,16 @@ MINRAM 65536
 	out %address r1
 	in r2 %BUS
 	ret
-.os_poke //IN: r1 = address r2 = data OUT: none
+.os_poke //IN: r1 = address r2 = data 
 	out %address r1
 	out %bus r2
 	ret
 .os_change_page //IN: r1 = page num(8192 byte pages)
 	out %page r1
 	ret
+	
+.os_write_block //IN: data array pointer
+	
 
 //----------------------------------------------------------------------------------------
 
