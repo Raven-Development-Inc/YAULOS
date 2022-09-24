@@ -147,6 +147,7 @@ MINRAM 65536
 	out %address r1
 	out %bus r2
 	ret
+	
 .os_change_page //IN: r1 = page num(8192 byte pages)
 	out %page r1
 	ret
