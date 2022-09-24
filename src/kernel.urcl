@@ -11,7 +11,7 @@ MINRAM 65536
 .VirtualRegisters
     DW [ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ] // R0 - R15
 
-.Process_Descriptor_table
+.Process_Descriptor_table //pointers to the proccess descripters
     DW [ 0 0 0 0 0 0 0 0 0 0 ] //0xff = taken up, 0x00 = free
 
 // IL interpreter cause more func & portable
@@ -38,10 +38,43 @@ MINRAM 65536
 	dw .Halt //exit the program
 	dw .In //same as IN in URCL
 	dw .Out //^^^
+	dw .Imm //immediately change RAM
+	
     
 // Instructions: WIP
-    
-    
+.Imm 
+	lstr .VirtualRegisters r2 r1
+	ret
+
+.Add
+	llod r1 .VirtualRegisters r3
+	llod r2 .VirtualRegisters r4
+	add r1 r1 r2
+	lstr .VirtualRegisters r5 r1
+	ret
+.Sub
+	llod r1 .VirtualRegisters r3
+	llod r2 .VirtualRegisters r4
+	sub r1 r1 r2
+	lstr .VirtualRegisters r5 r1
+	ret
+.Mul
+	llod r1 .VirtualRegisters r3
+	llod r2 .VirtualRegisters r4
+	mlt r1 r1 r2
+	lstr .VirtualRegisters r5 r1
+	ret
+.Div
+	llod r1 .VirtualRegisters 0
+	llod r2 .VirtualRegisters 1
+	div r1 r1 r2
+	lstr .VirtualRegisters 0 r1
+	ret
+
+.Lod
+	llod r2 .VirtualRegisters 1
+	lod r1 r2
+	
 
 //define values
 @define diskstart 258
