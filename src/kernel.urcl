@@ -162,9 +162,7 @@ MINSTACK 2048
 
 //Interpreter
 .InterpreterLoop
-	
-
-
+	ret
 
 
 
