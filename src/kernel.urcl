@@ -160,6 +160,16 @@ MINSTACK 2048
 
 
 
+//Interpreter
+.InterpreterLoop
+	
+
+
+
+
+
+
+
 //Errors
 .Ins_SystemCall_InvalidSyscall
 	STR .errorCode 1
