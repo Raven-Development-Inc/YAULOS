@@ -83,7 +83,7 @@ jmp .interpretloop
 .startLoop
 inc bf_pc bf_pc
 psh bf_pc
-str .isLoop 0xffff //useless shit
+str .isLoop 0xffff //useless shit 
 jmp .interpretloop
 
 .endLoop
