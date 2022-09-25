@@ -99,7 +99,7 @@ MINSTACK 2048
 	lod R1 R1
 	and R1 R1 R2
 	str R3 R1
-	RET
+	ret
 
 .Not
 	add R3 R3 .VirtualRegisters
@@ -108,6 +108,15 @@ MINSTACK 2048
 	lod R2 R2
 	lod R1 R1
 	not R1 R1 R2
+	str R3 R1
+	ret
+.Or
+	add R3 R3 .VirtualRegisters
+	add R2 R2 .VirtualRegisters
+	add R1 R1 .VirtualRegisters
+	lod R2 R2
+	lod R1 R1
+	or R1 R1 R2
 	str R3 R1
 	ret
 
@@ -131,9 +140,25 @@ MINSTACK 2048
 	str R3 R1
 	ret
 
+.Lod
+	add R2 R2 .VirtualRegisters
+	add R3 R3 .VirtualRegisters
+	lod R2 R2
+	cpy R3 R2
+	ret
+
+.Str
+	add R2 R2 .VirtualRegisters
+	add R3 R3 .VirtualRegisters
+	lod R3 R3
+	cpy R3 R2
+	ret
+
+
+
 //Errors
 .Ins_SystemCall_InvalidSyscall
-	STR .OSVar_ERROR 6
+	STR .errorCode 1
 	RET
 
 //define values
@@ -434,3 +459,9 @@ MINSTACK 2048
 	dw ["6" 0]
 .errorCode //change with llod
 	dw 0
+//Errors:
+//0: none
+//1: syscall doesn't exist
+//2: memory address out of bounds
+//3: OS ProdActivate Key failed (WIP)
+//4: 
