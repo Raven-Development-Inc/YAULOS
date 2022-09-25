@@ -1,11 +1,242 @@
-// UCOS 0.1.3
+// UCOS 0.1.5
+//Vibe to this shit thats on fire if ur reading: https://www.youtube.com/watch?v=TeXqIhG0888&list=PL3HjO-9hp7nwftlikzs5dNX58olyahWly&index=5
 
 // Assembly headers
 BITS == 16
-MINREGS 8
-MINHEAP 4096
-MINSTACK 1024 //a lot of stack for sbpc
-MINRAM 65536
+MINREGS 16
+MINHEAP 32768
+MINSTACK 2048 
+
+//macros
+//malloc
+@define MALLOC_MAINP M0
+//gfx
+@define ax r16
+@define ay r15
+@define bx r14
+@define by r13
+@define dx r12
+@define dy r11
+@define sx r10
+@define sy r9
+@define cx r8
+@define cy r7
+@define x r6
+@define y r5
+@define i r4
+//floats
+@define F16PI 0x4248
+@define F16E  0x4170
+@define NAN   0x7fff
+//disk
+@define diskstart 258
+
+//sounds
+
+@DEFINE d16 100 // 16th note
+@DEFINE d8 200 // 8th note
+@DEFINE d4 400 // quarter note
+@DEFINE d2 800 // half note
+@DEFINE df 1600 // full note
+@DEFINE d3_8 600 // 3/8th note
+@DEFINE d6 267 // triplet
+@DEFINE fs 0
+@DEFINE g 1
+@DEFINE gs 2
+@DEFINE a 3
+@DEFINE as 4
+@DEFINE b 5
+@DEFINE c 6
+@DEFINE cs 7
+@DEFINE d 8
+@DEFINE ds 9
+@DEFINE e 10
+@DEFINE f 11
+
+@DEFINE fs1 12
+@DEFINE g1 13
+@DEFINE gs1 14
+@DEFINE a1 15
+@DEFINE as1 16
+@DEFINE b1 17
+@DEFINE c1 18
+@DEFINE d1 19
+@DEFINE ds1 20
+@DEFINE e1 21
+@DEFINE f1 22
+@DEFINE a2 23
+@DEFINE as2 24
+@DEFINE b2 25
+@DEFINE c2 26
+@DEFINE len r8
+@DEFINE i r7
+
+.VirtualRegisters
+    DW [ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ] // R0 - R15
+
+.Process_Descriptor_table //pointers to the proccess descripters
+    DW [ 0 0 0 0 0 0 0 0 0 0 ] //descriptor pointer cannot be a 0, because 0 = free
+    
+//Procces descriptor format
+//PID: Any number not zero, zero is the OS
+//Name: Pointer to a string
+//
+
+// IL interpreter cause more func & portable
+.InstructionTable
+	dw .Add //add
+	dw .Sub //subtract
+	dw .Mul //multiply
+	dw .Div //divide
+	dw .Lod //load
+	dw .Str //store
+	dw .Bimm //bulk imm
+	dw .Scal //Call syscall
+	dw .Goto //Goto fuction
+	dw .Gotoif //goto if .flag is true
+	dw .Less //set flag if less than
+	dw .Greater //set flag if greater than
+	dw .Equal //set flag if equal
+	dw .Not //Logical NOT
+	dw .And //Logical AND
+	dw .Or //Logical OR
+	dw .NotEqual //Not Equal
+	dw .NotGreater //Not Greater
+	dw .NotLess //Not Less
+	dw .Halt //exit the program
+	dw .In //same as IN in URCL
+	dw .Out //^^^
+	dw .Imm //immediately change RAM
+	dw .Nop //no operation
+	dw .Shl //shift left
+	dw .SHr //shift right
+	
+    
+// Instructions: WIP
+.Nop
+	ret
+
+.Imm 
+	lstr .VirtualRegisters r2 r1
+	ret
+
+.Add
+	llod r1 .VirtualRegisters r3
+	llod r2 .VirtualRegisters r4
+	add r1 r1 r2
+	lstr .VirtualRegisters r5 r1
+	ret
+.Sub
+	llod r1 .VirtualRegisters r3
+	llod r2 .VirtualRegisters r4
+	sub r1 r1 r2
+	lstr .VirtualRegisters r5 r1
+	ret
+.Mul
+	llod r1 .VirtualRegisters r3
+	llod r2 .VirtualRegisters r4
+	mlt r1 r1 r2
+	lstr .VirtualRegisters r5 r1
+	ret
+.Div
+	llod r1 .VirtualRegisters r3
+	llod r2 .VirtualRegisters r4
+	div r1 r1 r2
+	lstr .VirtualRegisters 0 r5
+	ret
+
+.Scal
+	bsl R2 R2 4
+	or R1 R1 R2
+	brg .Ins_SystemCall_InvalidSyscall R1 36
+	llod R1 R1 .SystemCalls
+	cal R1
+	CAL .ContextSwitch
+	RET
+
+.And
+	add R3 R3 .VirtualRegisters
+	add R2 R2 .VirtualRegisters
+	add R1 R1 .VirtualRegisters
+	lod R2 R2
+	lod R1 R1
+	and R1 R1 R2
+	str R3 R1
+	ret
+
+.Not
+	add R3 R3 .VirtualRegisters
+	add R2 R2 .VirtualRegisters
+	add R1 R1 .VirtualRegisters
+	lod R2 R2
+	lod R1 R1
+	not R1 R1 R2
+	str R3 R1
+	ret
+.Or
+	add R3 R3 .VirtualRegisters
+	add R2 R2 .VirtualRegisters
+	add R1 R1 .VirtualRegisters
+	lod R2 R2
+	lod R1 R1
+	or R1 R1 R2
+	str R3 R1
+	ret
+
+.Shl
+	add R3 R3 .VirtualRegisters
+	add R2 R2 .VirtualRegisters
+	add R1 R1 .VirtualRegisters
+	lod R2 R2
+	lod R1 R1
+	bsl R1 R2 R1
+	str R3 R1
+	ret
+
+.Shr
+	add R3 R3 .VirtualRegisters
+	add R2 R2 .VirtualRegisters
+	add R1 R1 .VirtualRegisters
+	lod R2 R2
+	lod R1 R1
+	bsr R1 R2 R1
+	str R3 R1
+	ret
+
+.Lod
+	add R2 R2 .VirtualRegisters
+	add R3 R3 .VirtualRegisters
+	lod R2 R2
+	cpy R3 R2
+	ret
+
+.Str
+	add R2 R2 .VirtualRegisters
+	add R3 R3 .VirtualRegisters
+	lod R3 R3
+	cpy R3 R2
+	ret
+	
+.Immediate
+	lstr .VirtualRegisters r1 r2
+	ret
+
+
+
+//Interpreter
+.InterpreterLoop
+	ret
+
+
+
+
+
+//Errors
+.Ins_SystemCall_InvalidSyscall
+	STR .errorCode 1
+	RET
+
+
 
 //OS Vars
 .Bits
@@ -17,62 +248,11 @@ MINRAM 65536
 .MinHeap
 	dw @minheap
 
-.Syscalls //9 sys calls so far, planning on expanding the fs
-	dw .os_get_api_version //1
-	dw .os_get_raven_version //2
-	dw .os_error //3
-	dw .os_change_page //4
-	dw .os_peek //5
-	dw .os_poke //6
-	dw .os_create_file //7
-	dw .os_delete_file //8
-	dw .os_format_disk //9
-// Code
-.Init
-	cal .init_malloc
-	cal .os_get_raven_version
-	jmp .Init //infinite loop, not done yet
-	
-// Some syscalls ------------------------------------------------------------
+.currentDirectory
+        dw 0 //root dir = 0th dir current DIR is the Index of the directory
 
-//Misc------------------------------------------------------------------------------------
-.os_get_raven_version //Print RavenOS Version
-	imm r1 .version1
-	psh .version2
-	cal printf
-	ret
-.os_get_api_version //Prints API version
-	imm r1, api_version
-	cal printf
-	ret
-.os_error //Error code goes in .errorCode use llod to change it(is an int bc memory constraints)
-	psh r1
-	imm r1 .errorCode
-	out %uint r1
-	pop r1
-	ret
-
-//Disk -----------------------------------------------------------------------------------
-
-.os_peek //IN: r1 = address OUT: r2 = data
-	out %address r1
-	in r2 %BUS
-	ret
-.os_poke //IN: r1 = address r2 = data OUT: none
-	out %address r1
-	out %bus r2
-	ret
-.os_change_page //IN: r1 = page num(8192 byte pages)
-	out %page r1
-	ret
-
-//----------------------------------------------------------------------------------------
-
-// SimplexFS
-.os_format_disk //only call this once
-	// oh crap, gonna be a lot of imms and incs and cal os_pokes
-	
-	//damn, tones of RAM used
+//stuff
+//damn, tons of RAM used
 	.e
 		dw ["Setting up SimplexFS please be patient" 0] //tell the user wtf we are doing
 	.e1
@@ -102,6 +282,70 @@ MINRAM 65536
 		dw ["Programs installed, loading shell.exe..." 0]
 	.e13
 		dw ["Shell loaded, starting, enjoy session %d - User: %s" 0]
+
+.Syscalls //13 sys calls so far, expanding the fs right now
+	dw .os_get_api_version //1
+	dw .os_get_ucos_version //2
+	dw .os_error //3
+	dw .os_change_page //4
+	dw .os_peek //5
+	dw .os_poke //6
+	dw .os_create_file //7
+	dw .os_delete_file //8
+	dw .os_format_disk //9
+	dw .os_create_dir //10
+	dw .os_delete_dir //11
+	dw .os_change_dir //12
+	dw .os_print_wd //13
+// Code
+.Init
+	cal .init_malloc
+	cal .os_get_raven_version
+	jmp .Init //infinite loop, not done yet
+	
+// Some syscalls ------------------------------------------------------------
+
+//Misc------------------------------------------------------------------------------------
+.os_get_ucos_version //Print ucos Version
+	imm r1 .version1
+	psh .version2
+	cal printf
+	ret
+.os_get_api_version //Prints API version
+	imm r1, api_version
+	cal printf
+	ret
+.os_error //Error code goes in .errorCode use llod to change it(is an int bc memory constraints)
+	psh r1
+	imm r1 .errorCode
+	out %uint r1
+	pop r1
+	ret
+
+//Disk -----------------------------------------------------------------------------------
+
+.os_peek //IN: r1 = address OUT: r2 = data
+	out %addr r1
+	in r2 %BUS
+	ret
+.os_poke //IN: r1 = address r2 = data 
+	out %addr r1
+	out %bus r2
+	ret
+	
+.os_change_page //IN: r1 = page num(8192 byte pages)
+	out %page r1
+	ret
+	
+.os_write_block //IN: data array pointer
+	
+
+//----------------------------------------------------------------------------------------
+
+// SimplexFS
+.os_format_disk //only call this once
+	// oh crap, gonna be a lot of imms and incs and cal os_pokes
+	
 	imm r1 .e
 	cal .printf
 	imm r1 0
@@ -255,12 +499,28 @@ MINRAM 65536
 	cal .printf
 	pop r1
 	
+	//root len
+	imm r2 0
+	cal .os_poke
+	
 	ret
 .os_create_file
 	ret
 .os_delete_file
 	ret
-
+.os_create_dir
+	ret
+.os_delete_dir
+	ret
+.os_change_dir
+	lstr .currentDirectory r1 0
+	ret
+.os_print_wd
+	lod r1 .currentDirectory
+	cal .print_int
+	ret
+.os_write_file
+        ret
 // --------------------------------------------------------------------------
 
 
@@ -268,8 +528,1166 @@ MINRAM 65536
 .version1 //pls dont change
 	dw ["RavenOS Version %s" 0xa0 0]
 .version2 //pls dont change
-	dw ["0.1.1 alpha" 0]
+	dw ["0.1.5 alpha" 0]
 .api_version //pls dont change
-	dw ["1" 0]
+	dw ["6" 0]
 .errorCode //change with llod
 	dw 0
+//Errors:
+//0: none
+//1: syscall doesn't exist
+//2: memory address out of bounds
+//3: OS ProdActivate Key failed (WIP)
+//4: Fatal Error: Kernel Panic
+
+
+
+//STDLIB-URCL v2 -------------------------------------------------------------------------
+
+
+//Memory.urcl ----------------------------------------------------------------------------
+.init_malloc //init_malloc();
+str MALLOC_MAINP 0xffff
+ret
+
+//malloc();
+.malloc
+    psh r1 // size
+    psh r2 // dynamic malloc_start*
+    imm r2 MALLOC_MAINP
+    psh r3 // additional reg
+    psh r4
+    .malloc__loop1
+        lod r3 r2
+        brg .malloc__found__free r3 0x8000
+        and r3 r3 0x7fff
+        mov r2 r3
+        jmp .malloc__loop1
+    
+    .malloc__found__free
+        and r3 r3 0x7fff // getting address of next chunk (can work as size indicator)
+        sub r4 r3 r2 // size of chunk available
+        brl .malloc__found r1 r4
+        // bre .malloc__found__partition__needed r1 r4
+        bre .malloc__fail r3 0x7fff // check for failure
+        bre .malloc__fail r3 0x0000
+        mov r2 r3
+        jmp .malloc__loop1
+    .malloc__fail
+        pop r4
+        pop r3
+        pop r2
+        pop r1
+        imm r1 0xffff // -1
+        ret
+    .malloc__found
+        bne .malloc__found__skip r3 0x7fff // if ( address_of_the_next_chunk == 0x7fff) {
+        // r1 - size, r2 - pointer to curr chunk, r3 - addr to next chunk, r4 - size of chunk
+        psh r4
+        mov r4 r1
+        add r4 r4 r2
+        and r4 r4 0x7fff
+        add r4 r4 1
+        str r2 r4
+        str r4 0xffff
+        pop r4
+        jmp .malloc__end
+        // }
+        .malloc__found__skip 
+        bre .malloc__found__skip2 r1 r4 // if ( chunk_size != req_size ) { -> fragmentation
+        psh r4
+        psh r3
+        or r3 r3 0x8000 // making header from address
+        mov r4 r1 // 
+        add r4 r4 r2 // pointer to next header
+        and r4 r4 0x7fff 
+        add r4 r4 1 // making offset
+        str r2 r4
+        lod r5 r4
+        bne .malloc__found__endstack r5 0xffff // if ( r4* == END_OF_MALLOC_STACK ) {
+        str r4 0xffff
+        jmp .malloc__found__endstack_2
+        .malloc__found__endstack // } else {
+        str r4 r3
+        .malloc__found__endstack_2 // }
+        pop r3
+        pop r4
+        jmp .malloc__end
+        .malloc__found__skip2 // } else { -> simple address storing
+        and r3 r3 0x8000
+        str r2 r3
+        .malloc__end
+        pop r4
+        pop r3
+        mov r1 r2
+        inc r1 r1
+        pop r2
+        pop r0
+        ret
+
+//fastFree();
+.fast_free 
+    psh r1 // pointer
+    psh r2 // additional data
+    psh r3
+    psh r4
+    and r1 r1 0x7fff
+    dec r1 r1
+    lod r2 r1
+    brg .fast_free__alreadyfree r2 0x7fff
+    bre .fast_free__alreadyfree r2 0
+    sub r3 r2 r1 // size
+    dec r3 r3
+    inc r1 r1
+    mov r4 r1
+    dec r1 r1
+    .fast_free__loop1
+        str r4 0
+        inc r4 r4
+        dec r3 r3
+        bre .fast_free__freed r3 0
+        jmp .fast_free__loop1
+.fast_free__freed
+    or r2 r2 0x8000
+    str r1 r2
+.fast_free__alreadyfree
+    cal .defragm
+    pop r4
+    pop r3
+    pop r2
+    pop r1
+    ret
+.defragm
+    psh r1 // pointer
+    psh r2 // additional data
+    psh r3
+    lod r2 r1
+    brl .defragm_end r2 0x8000 // not free
+    and r2 r2 0x7fff
+    lod r3 r2
+    brl .defragm_end r3 0x8000
+    and r3 r3 0x7fff
+    str r1 r3
+    str r2 0
+    .defragm_end
+    pop r3
+    pop r2
+    pop r1
+    ret
+
+.free   //free();
+    psh r1 // pointer
+    psh r2 // additional data
+    psh r3
+    psh r4
+    and r1 r1 0x7fff
+    dec r1 r1
+    lod r2 r1
+    brg .free__alreadyfree r2 0x7fff
+    bre .free__alreadyfree r2 0
+    sub r3 r2 r1 // size
+    dec r3 r3
+    inc r1 r1
+    mov r4 r1
+    dec r1 r1
+    .free__loop1
+        str r4 0
+        inc r4 r4
+        dec r3 r3
+        bre .free__freed r3 0
+        jmp .free__loop1
+.free__freed
+    or r2 r2 0x8000
+    str r1 r2
+.free__alreadyfree
+    cal .defragm_global
+    pop r4
+    pop r3
+    pop r2
+    pop r1
+    ret
+        
+
+.defragm_global //defragmentation
+    psh r1 // dynamic malloc heap pointer
+    imm r1 MALLOC_MAINP
+    psh r2 // additional stuff
+    psh r3
+    .defragm_global__loop1
+        lod r2 r1
+        bre .defragm_global__end r2 0xffff
+        brg .defragm_global__found r2 0x7fff
+        mov r1 r2
+        jmp .defragm_global__loop1
+    .defragm_global__found
+        and r2 r2 0x7fff
+        lod r3 r2
+        brg .defragm_global__found2 r3 0x7fff
+        mov r1 r2
+        jmp .defragm_global__loop1
+    .defragm_global__found2
+        str r1 r3
+        str r2 0
+        jmp .defragm_global__loop1
+    .defragm_global__end
+        pop r3
+        pop r2
+        pop r1
+        ret
+//EOF ------------------------------------------------------------------------------------
+//Gfx.urcl -------------------------------------------------------------------------------
+.draw_line // in ax, ay, bx, by; var dx, dy, sx, sy, cx, cy, x, y, i 
+    MOV x ax
+    MOV y ay
+
+    OUT %X x
+    OUT %Y y
+    OUT %COLOR 255
+
+    SUB dx bx ax
+    IMM sx 1
+    BGE .bx_ge_ax bx ax
+        IMM sx -1
+        SUB dx ax bx
+    .bx_ge_ax
+
+    BRE .draw_line_eq_y ay by
+
+    SUB dy by ay
+    IMM sy 1
+    BGE .by_ge_ay by ay
+        IMM sy -1
+        SUB dy ay by
+    .by_ge_ay
+
+    BRE .draw_line_eq_x ax bx
+
+    RSH cx dx // cx = dx >>> 2
+    RSH cy dy // cy = dy >>> 2
+
+    BRG .else dx dy //  if dx < dy
+        BGE .end dx dy 
+        INC cx cx   //      cx++
+    JMP .end        //  else if dx > dy
+    .else           //  
+        INC cy cy   //      cy++
+    .end
+
+    ADD i dx dy
+    .loop   // for (i = dx+dy; i != 0; i--)
+        BGE .cxg cy cx  //  if cy < cx
+            SUB cx cx cy//      cx -= cy
+            IMM cy dy   //      cy = dy
+            ADD x x sx  //      x += sx
+        JMP .cxg_end
+        .cxg            // else
+            SUB cy cy cx//      cy -= cx
+            IMM cx dx   //      cx = dx
+            ADD y y sy  //      y += sy
+        .cxg_end
+        OUT %X x
+        OUT %Y y
+        OUT %COLOR 255
+        DEC i i
+        BNZ .loop i
+    RET
+
+    .draw_line_eq_y
+        BRE .eq_y_ret ax bx
+        .eq_y_loop
+            ADD x x sx
+            OUT %X x
+            OUT %COLOR 255
+            BNE .eq_y_loop x bx
+        .eq_y_ret
+        RET
+
+    .draw_line_eq_x
+        BRE .eq_x_ret ay by
+        .eq_x_loop
+            ADD y y sy
+            OUT %Y y
+            OUT %COLOR 255
+            BNE .eq_x_loop y by
+        .eq_x_ret
+        RET
+
+// image: R1 const Bin[ 64 ]*, x: R2 const int, y: R3 const int,
+// src_x: var R4, src_y: var R5, src_i/color: var R6
+// screen_width: const R8
+.draw_sprite8x8
+    IMM R5 0
+    .loop_y
+        ADD R5 R5 R3
+        OUT %Y R5
+        SUB R5 R5 R3
+        IMM R4 0
+        .loop_x
+            ADD R4 R4 R2
+            OUT %X R4
+            SUB R4 R4 R2
+            MLT R6 R5 8
+            ADD R6 R6 R4
+            ADD R6 R6 R1
+            LOD R6 R6
+            // OUT %NUMB R6
+            OUT %COLOR R6
+            INC R4 R4
+            BLE .loop_x R4 7
+        INC R5 R5
+        BLE .loop_y R5 7
+    RET
+//EOF ------------------------------------------------------------------------------------
+//float.urcl ----------------------------------------------------------------------------
+// FLOAT IMPLEMENTATION: 
+
+//create a float
+.float_construct
+    psh r1 // main int
+    psh r2 // v
+    psh r3 // sig 
+    psh r4 // e
+    brl .float_construct__else1 r1 0x8000
+    and r2 r1 0x7fff
+    imm r3 1
+    jmp .float_construct__else1_conti
+    .float_construct__else1
+        mov r2 r1
+    .float_construct__else1_conti
+    bre .float_construct_end_0 r2 0
+    imm r4 25
+    bge .while_v_over2048 r2 2048
+    jmp .while_v_less1024
+    .while_v_over2048
+        rsh r2 r2
+        inc r4 r4
+        bge .while_v_over2048 r2 2048
+    .while_v_less1024pre
+    brl .while_v_less1024 r2 1024
+    jmp .while_end
+    .while_v_less1024
+    lsh r2 r2
+    dec r4 r4
+    brl .while_v_less1024 r2 1024
+    .while_end
+    bge .e_over_31 r4 31
+    bsl r3 r3 15
+    bsl r4 r4 10
+    and r2 r2 1023
+    or r2 r2 r3
+    or r2 r2 r4
+    mov r1 r2
+    pop r4
+    pop r3
+    pop r2
+    pop r9
+    ret
+    .e_over_31
+    bsl r3 r3 15
+    and r3 r3 0x8000
+    or r3 r3 0x7c00
+    mov r1 r3
+    pop r4
+    pop r3
+    pop r2
+    pop r9
+    ret
+    .float_construct_end_0
+        pop r4
+        pop r3
+        pop r2
+        pop r1
+        imm r1 0
+        ret
+//create f16 from short
+.f16_from_short
+		psh r1
+		psh r2
+		psh r3
+		psh r4
+		brg .f16_from_int__if1_else r3 0 
+		sub r2 0 r1
+		imm r3 1
+		jmp .f16_from_int__if1_end
+	.f16_from_int__if1_else
+		mov r2 r1
+	.f16_from_int__if1_end
+		bre .f16_from_int__end0 r2 0
+		imm r4 25
+		brl .f16_from_int__while1_end r2 2048
+	.f16_from_int__while1_start
+		rsh r2 r2
+		inc r4 r4
+		bge .f16_from_int__while1_start r2 2048
+	.f16_from_int__while1_end
+		bge .f16_from_int__while2_end r2 1024
+	.f16_from_int__while2_start
+		lsh r2 r2
+		dec r4 r4
+		brl .f16_from_int__while2_start r2 1024
+	.f16_from_int__while2_end
+		bge .f16_from_int__if2 r4 31
+		bsl r3 r3 15
+		bsl r4 r4 10
+		and r2 r2 1023
+		or r2 r2 r3
+		or r2 r2 r4
+		mov r1 r2
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_from_int__if2
+		bsl r3 r3 15
+		and r3 r3 0x8000
+		or r3 r3 0x7c00
+		mov r1 r3
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_from_int__end0
+		pop r4
+		pop r3
+		pop r2
+		pop r1
+		imm r1 0
+		ret
+
+// convert float 16 to int
+.f16_to_int
+	psh r1 
+	psh r2 
+	psh r3
+	psh r4 
+	and r2 r1 1023 
+	and r4 r1 0x7c00 
+	setne r4 r4 0 
+	and r4 r4 1 
+	mlt r4 r4 1024 
+	or r4 r4 r2
+	and r2 r1 0x7c00
+	bsr r2 r2 10
+	sub r2 r2 25
+	sbrl .f16_to_int__if1_else r2 0
+	bre .f16_to_int__if1_end r2 0
+	bsl r4 r4 r2
+	jmp .f16_to_int__if1_end
+	.f16_to_int__if1_else
+	sub r2 0 r2
+	bsr r4 r4 r2
+	.f16_to_int__if1_end
+	and r1 r1 0x8000
+	brz .f16_to_int__end r1
+	sub r4 0 r4
+	.f16_to_int__end
+	mov r1 r4
+	pop r4
+	pop r3
+	pop r2
+	pop r9
+	ret
+
+.f16_add 
+	psh r1 // a
+	psh r2 // b 
+	psh r3 // sign 
+	psh r4 
+	psh r5 
+	psh r6 
+	psh r7 
+	psh r8
+	xor r3 r2 r1 
+	and r3 r3 0x8000
+	bre .f16_add__if1_end r3 0
+	cal .f16_sub
+	pop r8
+	pop r7
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r9
+	ret
+	.f16_add__if1_end
+		and r3 r1 0x8000
+		and r1 r1 0x7fff
+		and r2 r2 0x7fff
+		bge .f16_add__if2_end r1 r2
+		mov r4 r1
+		mov r1 r2
+		mov r2 r4
+	.f16_add__if2_end
+		setl r4 r1 0x7c00 
+		setl r5 r2 0x7c00 
+		and r4 r4 1 
+		and r5 r5 1 
+		or r4 r4 r5  
+		bnz .f16_add__if3_end r4
+		setg r4 r1 0x7c00 
+		setg r5 r2 0x7c00 
+		and r4 r4 1 
+		and r5 r5 1 
+		or r4 r4 r5 
+		bnz .f16_add__if4_end r4
+		imm r1 0x7fff
+	.f16_add__if4_end 
+		or r1 0x7c00 r3
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_add__if3_end
+		and r4 r1 0x7c00 
+		and r5 r2 0x7c00
+		sub r6 r4 r5
+		mov r7 r4
+		brz .f16_add__if5_else r6
+		bsr r8 r6 10
+		brz .f16_add__if6_else r5
+		and r2 r2 1023 
+		or r2 r2 1024 
+		bsr r2 r2 r8 
+		jmp .f16_add__if6_end
+	.f16_add__if6_else
+		dec r8 r8 
+		bsr r2 r2 r8 
+	.f16_add__if6_end
+		jmp .f16_add__if5_end
+	.f16_add__if5_else
+		bnz .f16_add__if7_else r5
+		add r1 r1 r2 
+		or r1 r1 r3
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+		jmp .f16_add__if7_end
+	.f16_add__if7_else
+		and r2 r2 1023 
+		or r2 r2 1024
+	.f16_add__if7_end
+		.f16_add__if5_end
+			add r4 r1 r2
+			and r5 r4 0x7c00 
+			bre .f16_add__if8_end r7 r5
+			and r6 r1 1023 
+			or r6 r6 1024
+			add r8 r6 r2 
+			rsh r8 r8
+			add r7 r7 0x400 
+			and r8 r8 1023 
+			or r4 r7 r8
+			.f16_add__if8_end
+				brl .f16_add__if9_end r4 0x7c00 
+				or r1 r3 0x7c00 
+				pop r8
+				pop r7
+				pop r6
+				pop r5
+				pop r4
+				pop r3
+				pop r2
+				pop r9
+				ret
+	.f16_add__if9_end
+		or r1 r4 r3
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+
+.f16_sub
+	psh r1 // a
+	psh r2 // b 
+	psh r3 // sign 
+	psh r4 
+	psh r5 
+	psh r6 
+	psh r7 
+	psh r8
+	psh r9
+	xor r3 r1 r2 // a ^ b
+	and r3 r3 0x8000  // (a^b) & 0x8000
+	brz .f16_sub__if1_end r3 // if((a^b)&0x8000 != 0) {
+	xor r2 r2 0x8000
+	cal .f16_add // return f16_add(a, b ^ 0x8000);
+	pop r9
+	pop r8
+	pop r7
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r9
+	ret
+	.f16_sub__if1_end // } 
+		and r3 r1 0x8000 // sign = a & 0x8000
+		lsh r1 r1 // a = a << 1 
+		lsh r2 r2 // b = b << 1
+		bge .f16_sub__if2_end r1 r2 // if(a < b) {
+		mov r4 r1 // swap values and sign
+		mov r1 r2
+		mov r2 r4
+		xor r3 r3 0x8000
+	.f16_sub__if2_end // }
+		and r5 r1 0xf800 // ax = a & 0xf800
+		and r6 r2 0xf800 // bx = b & 0xf800
+		setge r7 r1 0xf800 // is a >= 0xf800 ?
+		setge r8 r2 0xf800 // is b >= 0xf800 ?
+		or r7 r7 r8 // (a >= 0xf800 || b >= 0xf800) ?
+		and r7 r7 1 // bool(a >= 0xf800 || b >= 0xf800)
+		brz .f16_sub__if3_end r7 // if(a >= 0xf800 || b >= 0xf800) {
+		setg r7 r1 0xf800 // is a > 0xf800 ?
+		setg r8 r2 0xf800 // is b > 0xf800 ?
+		sete r9 r1 r2     // is a == b?
+		or r7 r8 r7       // (a > 0xf800 || b > 0xf800) ?
+		or r7 r7 r9       // (a > 0xf800 || b > 0xf800 || a == b) ?
+		and r7 r7 1       // bool(a > 0xf800 || b > 0xf800 || a == b)
+		brz .f16_sub__if4_end r7 // if(a > 0xf800 || b > 0xf800 || a == b) {
+		imm r1 0x7fff // return 0x7fff;
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_sub__if4_end // }
+		or r7 r3 0x7c00   //res = sign | 0x7c00
+		bne .f16_sub__if5_else r1 0xf800 // if(a == 0xf800) {
+		mov r1 r7 // return res
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_sub__if5_else // } else {
+		xor r1 r7 0x8000 // return res ^ 0x8000;
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_sub__if3_end // } 
+		sub r7 r5 r6 // exp_diff = ax - bx;
+		mov r8 r5 // exp_part = ax;
+		bre .f16_sub__if6_else r7 0 // if(exp_diff != 0) {
+		bsr r9 r7 11                // shift = exp_diff >> 11;
+		bre .f16_sub__if7_else r6 0 // if (bx != 0) {   
+		and r2 r2 2047              // b &= 2047
+		or r2 r2 2048               // b |= 2048
+		bsr r2 r2 r9                // b >>= shift
+		jmp .f16_sub__if7_end       // }
+	.f16_sub__if7_else          // else {
+		dec r9 r9                   // shift -=1 
+		bsr r2 r2 r9                // b >>= shift-1
+	.f16_sub__if7_end           // }
+		jmp .f16_sub__if6_end       // }
+	.f16_sub__if6_else          // else {
+		bne .f16_sub__if8_else r6 0 // if(bx == 0) {
+		sub r9 r1 r2                // res = a - b
+		rsh r9 r9                   // res >>= 1 ; res = (a-b)>>1;
+		bne .f16_sub__if9_end r9 0 // if(res == 0) {
+		mov r1 r9                   // return res;
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_sub__if9_end // }
+		or r1 r9 r3     // return res | sign;
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_sub__if8_else // } else {
+		and r2 r2 2047 // b &= 2047
+		or r2 r2 2048  // b |= 2048
+	.f16_sub__if8_end // }
+		.f16_sub__if6_end // }
+			sub r9 r1 r2    // 
+			and r7 r9 0xf800 
+			bne .f16_sub__if11_end r7 r8
+			rsh r9 r9 
+			or r1 r9 r3
+			pop r9
+			pop r8
+			pop r7
+			pop r6
+			pop r5
+			pop r4
+			pop r3
+			pop r2
+			pop r9
+			ret
+	.f16_sub__if11_end
+		and r5 r1 2047 
+		or r5 r5 2048
+		sub r6 r5 r2
+		bne .f16_sub__if10_end r6 0
+		imm r1 0
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_sub__if10_end
+		.f16_sub__while1 
+		setne r5 r8 0 
+		and r7 r6 2048 
+		sete r7 r7 0
+		and r5 r5 r7
+		and r5 r5 1
+		brz .f16_sub__while1_end r5
+		sub r8 r8 0x800
+		bre .f16_sub__while1 r8 0
+		lsh r6 r6 
+		jmp .f16_sub__while1
+	.f16_sub__while1_end
+		and r1 r6 2047 
+		or r1 r1 r8 
+		rsh r1 r1 
+		or r1 r1 r3
+		pop r9
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+
+.f16_mul 
+	psh r1 
+	psh r2 
+	psh r3 
+	psh r4 
+	psh r5 
+	psh r6 
+	psh r7 
+	psh r8
+	xor r3 r2 r1 
+	and r3 r3 0x8000 
+	and r4 r1 0x8000 
+	sete r4 r4 0x8000 
+	and r4 r4 1 
+	and r5 r2 0x8000 
+	sete r5 r5 0x8000 
+	and r5 r5 1 
+	or r4 r4 r5 
+	brz .f16_mul__if1_end r4
+	and r4 r1 0x7fff 
+	setg r4 r4 0x7c00 
+	and r4 r4 1 
+	and r5 r2 0x7fff 
+	setg r5 r5 0x7c00 
+	and r5 r5 1 
+	or r4 r4 r5 
+	brz .f16_mul__if2_end r4
+	imm r1 0x7fff
+	pop r8
+	pop r7
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r9
+	ret
+	.f16_mul__if2_end
+		or r1 r3 0x7c00
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_mul__if1_end
+		and r4 r1 0x7fff 
+		sete r4 r4 0 
+		and r4 r4 1 
+		and r5 r2 0x7fff 
+		sete r5 r5 0 
+		and r5 r5 1 
+		or r4 r4 r5
+		brz .f16_mul__if3_end r4
+		imm r1 0
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_mul__if3_end
+		and r4 r1 0x7c00 
+		setne r4 r4 0 
+		and r4 r4 1 
+		mlt r4 r4 1024 
+		and r5 r1 1023 
+		or r4 r4 r5
+		and r5 r2 0x7c00 
+		setne r5 r5 0 
+		and r5 r5 1 
+		mlt r5 r5 1024 
+		and r6 r2 1023 
+		or r5 r5 r6
+		mlt r8 r4 r5 
+		umlt r7 r4 r5
+		mov r4 r8
+		and r5 r1 0x7c00 
+		bsr r5 r5 10 
+		sete r6 r5 0 
+		and r6 r6 1 
+		add r5 r5 r6
+		and r6 r2 0x7c00 
+		bsr r6 r6 10 
+		sete r8 r6 0 
+		and r8 r8 1 
+		add r6 r6 r8
+		add r5 r5 r6 
+		sub r5 r5 15
+		and r8 r8 0b10000 
+		bre .f16_mul__if4_elseif r8 0 
+		psh r7 
+		bsr r7 r7 11 
+		bsr r4 r4 11 
+		pop r8 
+		bsl r8 r8 5 
+		or r4 r4 r8
+		inc r5 r5
+		jmp .f16_mul__if4_end
+	.f16_mul__if4_elseif
+		and r8 r7 0b1000 
+		bre .f16_mul__if4_else r8 0
+		psh r7
+		psh r7 
+		bsr r7 r7 10 
+		bsr r4 r4 10 
+		pop r8
+		pop r7  
+		bsl r8 r8 6 
+		or r4 r4 r8
+		jmp .f16_mul__if4_end
+	.f16_mul__if4_else
+		sub r5 r5 10
+	.f16_mul__while1 
+		setge r1 r4 2048 
+		and r1 r1 1 
+		setne r2 r7 0
+		and r2 r2 1
+		or r1 r1 r2
+		brz .f16_mul__while1_end r1
+		psh r7
+		bsr r7 r7 1 
+		bsr r4 r4 1 
+		pop r8
+		bsl r8 r8 15 
+		or r4 r4 r8
+		inc r5 r5
+		jmp .f16_mul__while1
+	.f16_mul__while1_end
+		.f16_mul__if4_end
+			sbrg .f16_mul__if5_elseif r5 0
+			neg r5 r5 
+			inc r5 r5 
+			psh r7 
+			psh r7
+			bsr r7 r7 r5 
+			bsr r4 r4 r5 
+			sub r5 16 r5 
+			pop r8
+			pop r7 
+			bsl r8 r8 r5 
+			or r4 r4 r8 
+			imm r5 0 
+	.f16_mul__if5_elseif
+		brl .f16_mul__if5_end r5 31
+		and r1 r3 0x8000 
+		or r1 r1 0x7c00
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+	.f16_mul__if5_end
+		bsl r1 r5 10 
+		and r4 r4 1023 
+		or r1 r1 r4 
+		or r1 r1 r3
+		pop r8
+		pop r7
+		pop r6
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r9
+		ret
+
+//EOF -----------------------------------------------------------------------------------
+//assert.urcl ---------------------------------------------------------------------------
+//basically compares 2 numbers (that are in registers 1 and 2 I might add(vars not supported yet)) and halts if not equal
+.assert_reg
+    bre .assert_err R1 R2 
+    .assert_err
+        cal .error
+        hlt
+    .error
+        imm R1 error_str
+        cal .printf
+        ret
+    .error_str
+        dw ["Assertion failed, terminating..." 0]
+//EOF -----------------------------------------------------------------------------------
+//math.urcl -----------------------------------------------------------------------------
+.sqrt
+    psh r1 // x
+    psh r2 // tmp 
+    bsl r2 15 10
+    add r1 r1 r2
+    rsh r1 r1
+    pop r2
+    pop r9
+    ret
+//EOF -----------------------------------------------------------------------------------
+.print_str
+    // input data: r1 -> char*
+    psh r1
+    psh r2 // reserve reg
+    imm r2 0
+    .print_str__loop1
+        lod r2 r1
+        bre .print_str__endp r2 0
+        out %text r2
+        inc r1 r1
+        jmp .print_str__loop1
+    .print_str__endp
+        pop r2
+        pop r1
+        ret
+
+.printf // r1 = char*
+    pop r9 // ret*
+    str 0xee0 r1 
+    str 0xee1 r2
+    str 0xee2 r3
+    imm r2 0
+    .printf__loop1
+        lod r2 r1
+        bre .printf_str__endp r2 0
+        bre .printf__perc r2 '%'
+        out %text r2
+        inc r1 r1
+        jmp .printf__loop1
+    .printf__perc
+        inc r1 r1
+        lod r2 r1
+        bre .printf__percsub__d r2 'd'
+        bre .printf__percsub__s r2 's'
+        bre .printf__percsub__c r2 'c'
+        bre .printf__percsub__perc r2 '%'
+        jmp .printf__percsub__err
+    .printf__percsub__perc
+        out %text '%'
+        inc r1 r1
+        jmp .printf__loop1
+    .printf__percsub__d
+        pop r3
+        out %numb r3
+        inc r1 r1
+        jmp .printf__loop1
+    .printf__percsub__c
+        pop r3
+        out %text r3
+        inc r1 r1
+        jmp .printf__loop1
+    .printf__percsub__s
+        pop r3
+        str 0xee3 r1
+        mov r1 r3
+        cal .print_str
+        lod r1 0xee3
+        inc r1 r1
+        jmp .printf__loop1
+    .printf__percsub__err
+        imm r1 .printf__percsub__err_str
+        psh r2
+        cal .printf
+    .printf_str__endp
+        lod r3 0xee2
+        lod r2 0xee1
+        lod r1 0xee0
+        jmp r9
+    .printf__percsub__err_str
+        dw [ "Wrong percentage-value %c" 0 ]
+
+.print_int //int goes in r1
+	out %int r1
+	ret
+//EOF -----------------------------------------------------------------------------------
+//stdlib.urcl ---------------------------------------------------------------------------
+.strlen
+    psh r1 // str *
+    psh r2 // additional reg
+    psh r3
+    imm r3 0
+    .strlen__loop1
+        lod r2 r1
+        bre .strlen__end r2 0
+        inc r3 r3
+        inc r1 r1
+        jmp .strlen__loop1
+    .strlen__end
+        mov r1 r3
+        pop r3
+        pop r2
+        pop r9
+        ret
+
+.strcpy
+    psh r1 // dest str*
+    psh r2 // src str*
+    psh r3 // additional reg
+    .strcpy__loop1
+        lod r3 r2
+        bre .strcpy__end r3 0
+        str r1 r3
+        inc r2 r2
+        inc r1 r1
+        jmp .strcpy__loop1
+    .strcpy__end
+        pop r3
+        pop r2
+        pop r1
+        ret
+
+
+    
+.memcpy
+    psh r1 // dest *
+    psh r2 // src *
+    psh r3 // size
+    psh r4 // additional
+    .memcpy__loop1
+        lod r4 r2
+        str r1 r4
+        dec r3 r3
+        inc r1 r1
+        inc r2 r2
+        bre .memcpy__done r3 0
+        jmp .memcpy__loop1
+.memcpy__done
+    pop r4
+    pop r3
+    pop r2
+    pop r1
+    ret
+//EOF -----------------------------------------------------------------------------------
+//audio.urcl ----------------------------------------------------------------------------
+.bar0
+DW [ e1 d8    e1 d8    0 d8    e1 d8   0 d8    c1 d8   c1 d4 ]
+.bar1
+DW [ g1 d4    0 d4    g d4    0 d4 ]
+.bar2
+DW [ c1 d4    0 d8    g d4    0 d8    e d4 ]
+.bar3
+DW [ 0 d4     a1 d4   b1 d4   as1 d8  a1 d4 ]
+.bar4
+DW [ g d6     e1 d6   g1 d6   a2 d4   f1 d8   g1 d8 ] 
+.bar5
+DW [ 0 d8     e1 d4   c1 d8   d1 d8   b1 d4   0 d8 ] // play from bar 2 again
+.bar6
+DW [ 0 d4     g1 d8   fs1 d8  ds1 d8  e1 d8 ]
+.bar7
+DW [ gs d8    a1 d8   c1 d8   0 d8    a1 d8   c1 d8   d1 d8 ] 
+.bar8
+DW [ 0 d4     g1 d8   fs1 d8  ds1 d4  e1 d8 ]
+.bar9
+DW [ 0 d8     c2 d4   c2 d8   c2 d4   0 d8 ]
+.bar10
+DW [ 0 d4     g1 d8   fs1 d8  ds1 d4  e1 d8 ]
+.bar11
+DW [ 0 d8     gs d8   a1 d8   c1 d8   0 d8    a1 d8   c1 d8   d1 d8 ]
+.bar12
+DW [ 0 d4     ds1 d4  0 d8    d1 d4   0 d8 ]
+.bar13
+DW [ c1 d4    0 d2    0 d4 ]
+.bar14
+DW [ c1 d8    c1 d8   0 d8    c1 d8   0 d8    c1 d8   d1 d4 ]
+.end
+DW
+
+.play
+    SUB r1 len 20
+    OUT %NLEG r1
+    OUT %WAIT len
+    IN r0 %WAIT
+    RET
+
+.wait
+    OUT %WAIT len
+    IN r0 %WAIT
+    RET
+//EOF -----------------------------------------------------------------------------------
+//END OF OS FILE

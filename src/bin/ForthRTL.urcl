@@ -1,0 +1,53 @@
+bits 16
+minregs 8
+minram 32768
+
+@define input r2
+@define output r1
+@define output1 r3
+@define topofram 32768
+
+//Forth primitive defs
+
+.push //literal push
+    psh input
+    ret
+    
+.pop //literal pop
+    pop output
+    ret
+    
+.plus //+
+    cal .pop
+    cpy r1 r3
+    cal .pop
+    add r1 r1 r3
+    cal .push
+    ret
+    
+.minus //-
+    cal .pop
+    cpy r1 r3
+    cal .pop
+    sub r1 r1 r3
+    cal .push
+    ret
+    
+.rotr //idk if this works
+    mov R7 SP
+    mov SP topofram
+    cal .pop
+    mov SP R7
+    cal .push 
+    ret
+    
+.rotl //idk even more if this works
+    cal .pop
+    mov R7 SP
+    mov SP topofram
+    cal .push
+    mov SP R7
+    ret
+    
+
+

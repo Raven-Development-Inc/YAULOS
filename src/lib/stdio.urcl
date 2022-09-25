@@ -1,4 +1,5 @@
-bits == 16
+bits >= 16
+minreg 4
 
 .print_str
     // input data: r1 -> char*
