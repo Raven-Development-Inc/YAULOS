@@ -39,6 +39,9 @@ bne .commandNotFound currchar ']'
 HLT
 
 
+.isLoop
+	dw 0
+
 .incPtr
 inc r1 r1
 cal .checkPointerSafety
@@ -80,6 +83,7 @@ jmp .interpretloop
 .startLoop
 inc bf_pc bf_pc
 psh bf_pc
+str .isLoop 0xffff //useless shit
 jmp .interpretloop
 
 .endLoop
