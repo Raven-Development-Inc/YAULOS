@@ -8,7 +8,9 @@ MINHEAP 32768
 MINSTACK 2048 
 
 //macros
+//malloc
 @define MALLOC_MAINP M0
+//gfx
 @define ax r16
 @define ay r15
 @define bx r14
@@ -22,9 +24,52 @@ MINSTACK 2048
 @define x r6
 @define y r5
 @define i r4
+//floats
 @define F16PI 0x4248
 @define F16E  0x4170
 @define NAN   0x7fff
+//disk
+@define diskstart 258
+
+//sounds
+
+@DEFINE d16 100 // 16th note
+@DEFINE d8 200 // 8th note
+@DEFINE d4 400 // quarter note
+@DEFINE d2 800 // half note
+@DEFINE df 1600 // full note
+@DEFINE d3_8 600 // 3/8th note
+@DEFINE d6 267 // triplet
+@DEFINE fs 0
+@DEFINE g 1
+@DEFINE gs 2
+@DEFINE a 3
+@DEFINE as 4
+@DEFINE b 5
+@DEFINE c 6
+@DEFINE cs 7
+@DEFINE d 8
+@DEFINE ds 9
+@DEFINE e 10
+@DEFINE f 11
+
+@DEFINE fs1 12
+@DEFINE g1 13
+@DEFINE gs1 14
+@DEFINE a1 15
+@DEFINE as1 16
+@DEFINE b1 17
+@DEFINE c1 18
+@DEFINE d1 19
+@DEFINE ds1 20
+@DEFINE e1 21
+@DEFINE f1 22
+@DEFINE a2 23
+@DEFINE as2 24
+@DEFINE b2 25
+@DEFINE c2 26
+@DEFINE len r8
+@DEFINE i r7
 
 .VirtualRegisters
     DW [ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ] // R0 - R15
@@ -793,7 +838,7 @@ ret
         BLE .loop_y R5 7
     RET
 //EOF ------------------------------------------------------------------------------------
-//FLOATS.urcl ----------------------------------------------------------------------------
+//float.urcl ----------------------------------------------------------------------------
 // FLOAT IMPLEMENTATION: 
 
 //create a float
@@ -1540,3 +1585,109 @@ ret
 .print_int //int goes in r1
 	out %int r1
 	ret
+//EOF -----------------------------------------------------------------------------------
+//stdlib.urcl ---------------------------------------------------------------------------
+.strlen
+    psh r1 // str *
+    psh r2 // additional reg
+    psh r3
+    imm r3 0
+    .strlen__loop1
+        lod r2 r1
+        bre .strlen__end r2 0
+        inc r3 r3
+        inc r1 r1
+        jmp .strlen__loop1
+    .strlen__end
+        mov r1 r3
+        pop r3
+        pop r2
+        pop r9
+        ret
+
+.strcpy
+    psh r1 // dest str*
+    psh r2 // src str*
+    psh r3 // additional reg
+    .strcpy__loop1
+        lod r3 r2
+        bre .strcpy__end r3 0
+        str r1 r3
+        inc r2 r2
+        inc r1 r1
+        jmp .strcpy__loop1
+    .strcpy__end
+        pop r3
+        pop r2
+        pop r1
+        ret
+
+
+    
+.memcpy
+    psh r1 // dest *
+    psh r2 // src *
+    psh r3 // size
+    psh r4 // additional
+    .memcpy__loop1
+        lod r4 r2
+        str r1 r4
+        dec r3 r3
+        inc r1 r1
+        inc r2 r2
+        bre .memcpy__done r3 0
+        jmp .memcpy__loop1
+.memcpy__done
+    pop r4
+    pop r3
+    pop r2
+    pop r1
+    ret
+//EOF -----------------------------------------------------------------------------------
+//audio.urcl ----------------------------------------------------------------------------
+.bar0
+DW [ e1 d8    e1 d8    0 d8    e1 d8   0 d8    c1 d8   c1 d4 ]
+.bar1
+DW [ g1 d4    0 d4    g d4    0 d4 ]
+.bar2
+DW [ c1 d4    0 d8    g d4    0 d8    e d4 ]
+.bar3
+DW [ 0 d4     a1 d4   b1 d4   as1 d8  a1 d4 ]
+.bar4
+DW [ g d6     e1 d6   g1 d6   a2 d4   f1 d8   g1 d8 ] 
+.bar5
+DW [ 0 d8     e1 d4   c1 d8   d1 d8   b1 d4   0 d8 ] // play from bar 2 again
+.bar6
+DW [ 0 d4     g1 d8   fs1 d8  ds1 d8  e1 d8 ]
+.bar7
+DW [ gs d8    a1 d8   c1 d8   0 d8    a1 d8   c1 d8   d1 d8 ] 
+.bar8
+DW [ 0 d4     g1 d8   fs1 d8  ds1 d4  e1 d8 ]
+.bar9
+DW [ 0 d8     c2 d4   c2 d8   c2 d4   0 d8 ]
+.bar10
+DW [ 0 d4     g1 d8   fs1 d8  ds1 d4  e1 d8 ]
+.bar11
+DW [ 0 d8     gs d8   a1 d8   c1 d8   0 d8    a1 d8   c1 d8   d1 d8 ]
+.bar12
+DW [ 0 d4     ds1 d4  0 d8    d1 d4   0 d8 ]
+.bar13
+DW [ c1 d4    0 d2    0 d4 ]
+.bar14
+DW [ c1 d8    c1 d8   0 d8    c1 d8   0 d8    c1 d8   d1 d4 ]
+.end
+DW
+
+.play
+    SUB r1 len 20
+    OUT %NLEG r1
+    OUT %WAIT len
+    IN r0 %WAIT
+    RET
+
+.wait
+    OUT %WAIT len
+    IN r0 %WAIT
+    RET
+//EOF -----------------------------------------------------------------------------------
+//END OF OS FILE
