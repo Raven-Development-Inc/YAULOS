@@ -153,6 +153,10 @@ MINSTACK 2048
 	lod R3 R3
 	cpy R3 R2
 	ret
+	
+.Immediate
+	lstr .VirtualRegisters r1 r2
+	ret
 
 
 
