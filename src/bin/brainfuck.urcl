@@ -28,6 +28,14 @@ bre .printPtr currchar '.'
 bre .inputPtr currchar ','
 bre .startLoop currchar '['
 bre .endLoop currchar ']'
+bne .commandNotFound currchar '>'
+bne .commandNotFound currchar '<'
+bne .commandNotFound currchar '+'
+bne .commandNotFound currchar '-'
+bne .commandNotFound currchar '.'
+bne .commandNotFound currchar ','
+bne .commandNotFound currchar '['
+bne .commandNotFound currchar ']'
 HLT
 
 
@@ -108,6 +116,27 @@ out %text 'a'
 out %text 'u'
 out %text 'l'
 out %text 't'
+out %text '.'
+hlt
+
+.commandNotFound
+out %text 'C'
+out %text 'o'
+out %text 'm'
+out %text 'm'
+out %text 'a'
+out %text 'n'
+out %text 'd'
+out %text ' '
+out %text 'n'
+out %text 'o'
+out %text 't'
+out %text ' '
+out %text 'f'
+out %text 'o'
+out %text 'u'
+out %text 'n'
+out %text 'd'
 out %text '.'
 hlt
 
