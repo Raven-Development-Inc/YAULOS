@@ -1,29 +1,27 @@
-/**
-    URCL Memory management library
-    Minimal bits that can run this library: 16
-    Minimal stack that can run this library is underfined, but recommended to set it to 0x30-0xff
-    Minimal heap that can be used depends on amount of allocations your program is supposed to make
-    Functions included:
-    -   void* malloc(size_t);
-    -   void free(void*);
-    -   void init_malloc();
-    -   void defragm_global();
-    -   void fast_free(void*);
-    Function descriptions:
-    -   void* malloc(size_t);
-    --      Allocates space on heap with size of an argument, returns pointer to the first data word of allocated block
-    -   void free(void*);
-    --      Deletes all the data stored in block, changes header of block to free status and defragmentates whole malloc-heap
-    -   void init_malloc();
-    --      Initializes heap for it to be useable, if not called, malloc(size_t), free(void*), fast_free(void*) and defragm_global() may cause memory corruption.
-    --      If heap is initialized, storing to the constant address may cause memory corruption
-    -   void defragm_global();
-    --      Defragmentates whole malloc-heap for concatenation of free blocks.
-    -   void fast_free(void*);
-    --      Deletes all the data stored in block, changes header of block to free status and defragmentates adjacent block instead of whole malloc-heap
-    Author: em3rald1
-    Thanks to Kuggo, Tuk(eque), Verlio_H
-*/
+//    URCL Memory management library
+//    Minimal bits that can run this library: 16
+//    Minimal stack that can run this library is underfined, but recommended to set it to 0x30-0xff
+//    Minimal heap that can be used depends on amount of allocations your program is supposed to make
+//    Functions included:
+//    -   void* malloc(size_t);
+//    -   void free(void*);
+//    -   void init_malloc();
+//    -   void defragm_global();
+//    -   void fast_free(void*);
+//    Function descriptions:
+//    -   void* malloc(size_t);
+//    --      Allocates space on heap with size of an argument, returns pointer to the first data word of allocated block
+//    -   void free(void*);
+//    --      Deletes all the data stored in block, changes header of block to free status and defragmentates whole malloc-heap
+//    -   void init_malloc();
+//    --      Initializes heap for it to be useable, if not called, malloc(size_t), free(void*), fast_free(void*) and defragm_global() may cause memory corruption.
+//    --      If heap is initialized, storing to the constant address may cause memory corruption
+//    -   void defragm_global();
+//    --      Defragmentates whole malloc-heap for concatenation of free blocks.
+//    -   void fast_free(void*);
+//    --      Deletes all the data stored in block, changes header of block to free status and defragmentates adjacent block instead of whole malloc-heap
+//    Author: em3rald1
+//    Thanks to Kuggo, Tuk(eque), Verlio_H
 
 bits >= 16
 minheap 0xffff
