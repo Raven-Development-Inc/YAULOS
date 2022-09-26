@@ -71,6 +71,13 @@ MINSTACK 2048
 @DEFINE len r8
 @DEFINE i r7
 
+.sys_vars
+    dw 0
+.mouse_x_y
+    dw [0 0]
+.mouse_button_status
+    dw 0
+
 .VirtualRegisters
     DW [ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ] // R0 - R15
 
@@ -778,6 +785,34 @@ MINSTACK 2048
         pop r1
         ret
 
+.window_render //RENDER THE F-ING WINDOW YOU SU- im sorry my bad
+    psh r1 //window*
+    psh r2
+    psh r3
+    llod r2 r1 1
+    llod r3 r1 2
+    lod r1 r1
+    cal .render_sprite
+    pop r3
+    pop r2
+    pop r1
+    ret
+
+//----------------------------------------------------------------------------------------
+//Renders --------------------------------------------------------------------------------
+.render_letter
+    psh r1 //char
+    psh r2 // x
+    psh r3 // y
+    sub r1 r1 32
+    mlt r1 r1 27
+    add r1 r1 .space1
+    cal .render_sprite
+    pop r3
+    pop r2
+    pop r1
+    ret
+// ---------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------
 // OS variables
 .version1 //pls dont change
