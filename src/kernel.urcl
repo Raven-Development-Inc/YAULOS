@@ -754,7 +754,7 @@ MINSTACK 2048
     pop r9
     ret
 
-.window_fill_reimplement
+.window_fill //Fill a window with color lolol
     psh r1 // window*
     psh r2 // color
     psh r3 // additional reg
