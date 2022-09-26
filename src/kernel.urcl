@@ -146,13 +146,9 @@ MINSTACK 2048
 	ret
 
 .Scal
-	bsl R2 R2 4
-	or R1 R1 R2
+	
 	brg .Ins_SystemCall_InvalidSyscall R1 36
-	llod R1 R1 .SystemCalls
-	cal R1
-	CAL .ContextSwitch
-	RET
+	
 
 .And
 	add R3 R3 .VirtualRegisters
@@ -300,7 +296,7 @@ MINSTACK 2048
 // Code
 .Init
 	cal .init_malloc
-	cal .os_get_raven_version
+	cal .os_get_ucos_version
 	jmp .Init //infinite loop, not done yet
 	
 // Some syscalls ------------------------------------------------------------
@@ -538,9 +534,716 @@ MINSTACK 2048
 //1: syscall doesn't exist
 //2: memory address out of bounds
 //3: OS ProdActivate Key failed (WIP)
-//4: Fatal Error: Kernel Panic
+//4: Fatal Error: Kernel Panic call panic(void);
+//5: bad command
+//6: 
 
 
+//Shell Start ----------------------------------------------------------------------------
+
+.Shell
+	jmp .ShellEnd
+.ShellEnd
+	jmp
+
+//Shell End ------------------------------------------------------------------------------
+//Font -----------------------------------------------------------------------------------
+.space1
+    dw [5 5]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+.exclamationMark1
+    dw [5 5]
+    dw [0 7 0 0 0]
+    dw [0 7 0 0 0]
+    dw [0 7 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 7 0 0 0]
+.quote1
+    dw [5 5]
+    dw [0 7 0 7 0]
+    dw [0 7 0 7 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+
+.hashtag
+    dw [5 5]
+    dw [0 7 0 7 0]
+    dw [7 7 7 7 7]
+    dw [0 7 0 7 0]
+    dw [7 7 7 7 7]
+    dw [0 7 0 7 0]
+.dollarSign
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 7 0 0]
+    dw [0 7 7 7 0]
+    dw [0 0 7 0 7]
+    dw [0 7 7 7 0]
+.percentSign    
+    dw [5 5]
+    dw [0 7 0 7 0]
+    dw [0 0 0 7 0]
+    dw [0 0 7 0 0]
+    dw [0 7 0 0 0]
+    dw [0 7 0 7 0]
+.andSign
+    dw [5 5]
+    dw [0 0 7 0 0]
+    dw [0 7 0 7 0]
+    dw [0 0 7 0 0]
+    dw [0 7 0 7 0]
+    dw [0 7 7 7 0]
+.singlequotesign
+    dw [5 5]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+.leftParenthesis
+    dw [5 5]
+    dw [0 0 7 0 0]
+    dw [0 7 0 0 0]
+    dw [0 7 0 0 0]
+    dw [0 7 0 0 0]
+    dw [0 0 7 0 0]
+.rightParenthesis
+    dw [5 5]
+    dw [0 0 7 0 0]
+    dw [0 0 0 7 0]
+    dw [0 0 0 7 0]
+    dw [0 0 0 7 0]
+    dw [0 0 7 0 0]
+.starSign
+    dw [5 5]
+    dw [0 0 0 0 0]
+    dw [0 7 0 7 0]
+    dw [0 0 7 0 0]
+    dw [0 7 0 7 0]
+    dw [0 0 0 0 0]
+.plusSign
+    dw [5 5]
+    dw [0 0 0 0 0]
+    dw [0 0 7 0 0]
+    dw [0 7 7 7 0]
+    dw [0 0 7 0 0]
+    dw [0 0 0 0 0]
+.commaSign
+    dw [5 5]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 7 0 0]
+    dw [0 7 0 0 0]
+.dashSign
+    dw [5 5]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [7 7 7 7 7]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+.dotSign
+    dw [5 5]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 7 0 0 0]
+.slashSign
+    dw [5 5]
+    dw [0 0 0 7 0]
+    dw [0 0 0 7 0]
+    dw [0 0 7 0 0]
+    dw [0 7 0 0 0]
+    dw [0 7 0 0 0]
+.zeroNumb
+    dw [5 5]
+    dw [0 7 7 0 0]
+    dw [7 0 0 7 0]
+    dw [7 0 0 7 0]
+    dw [7 0 0 7 0]
+    dw [0 7 7 0 0]
+.oneNumb
+    dw [5 5]
+    dw [0 0 7 0 0]
+    dw [0 7 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 7 7 7 0]
+.twoNumb
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [0 0 0 0 7]
+    dw [0 0 7 7 0]
+    dw [0 7 0 0 0]
+    dw [0 7 7 7 7]
+.threeNumb
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [0 0 7 7 0]
+    dw [7 0 0 0 7]
+    dw [0 7 7 7 0]
+.fourNumb
+    dw [5 5]
+    dw [0 7 0 7 0]
+    dw [0 7 0 7 0]
+    dw [0 7 7 7 0]
+    dw [0 0 0 7 0]
+    dw [0 0 0 7 0]
+.fiveNumb
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [0 7 0 0 0]
+    dw [0 7 7 7 0]
+    dw [0 0 0 7 0]
+    dw [0 7 7 0 0]
+.sixNumb
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 0]
+    dw [7 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [0 7 7 7 0]
+.sevenNumb
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [0 0 0 7 0]
+    dw [0 0 0 7 0]
+    dw [0 0 0 7 0]
+    dw [0 0 0 7 0]
+.eightNumb
+    dw [5 5]
+    dw [0 7 7 0 0]
+    dw [7 0 0 7 0]
+    dw [0 7 7 0 0]
+    dw [7 0 0 7 0]
+    dw [0 7 7 7 0]
+.nineNumb
+    dw [5 5]
+    dw [0 7 7 0 0]
+    dw [7 0 0 7 0]
+    dw [0 7 7 7 0]
+    dw [0 0 0 7 0]
+    dw [0 7 7 0 0]
+.doubledotsign
+    dw [5 5]
+    dw [0 0 0 0 0]
+    dw [0 7 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 7 0 0 0]
+    dw [0 0 0 0 0]
+.semicolonsign
+    dw [5 5]
+    dw [0 7 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 7 0 0 0]
+    dw [7 0 0 0 0]
+.lesssign
+    dw [5 5]
+    dw [0 0 0 7 7]
+    dw [0 7 7 0 0]
+    dw [7 0 0 0 0]
+    dw [0 7 7 0 0]
+    dw [0 0 0 7 7]
+.equalsing
+    dw [5 5]
+    dw [0 0 0 0 0]
+    dw [7 7 7 7 7]
+    dw [0 0 0 0 0]
+    dw [7 7 7 7 7]
+    dw [0 0 0 0 0]
+.greatersign
+    dw [5 5]
+    dw [7 7 0 0 0]
+    dw [0 0 7 7 0]
+    dw [0 0 0 0 7]
+    dw [0 0 7 7 0]
+    dw [7 7 0 0 0]
+.questionmark
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [0 0 7 7 0]
+    dw [0 0 0 0 0]
+    dw [0 0 7 0 0]
+.dogsign
+    dw [5 5]
+    dw [0 0 7 7 0]
+    dw [7 7 0 0 7]
+    dw [7 7 7 0 7]
+    dw [7 0 0 0 7]
+    dw [0 7 7 7 0]
+.letterA_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 7 7 7 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+
+.letterB_rend
+    dw [5 5]
+    dw [7 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 7 7 7 7]
+
+.letterC_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 0]
+    dw [7 0 0 0 7]
+    dw [0 7 7 7 0]
+
+.letterD_rend
+    dw [5 5]
+    dw [7 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 7 7 7 0]
+
+.letterE_rend
+    dw [5 5]
+    dw [7 7 7 7 7]
+    dw [7 0 0 0 0]
+    dw [7 7 7 7 0]
+    dw [7 0 0 0 0]
+    dw [7 7 7 7 7]
+
+.letterF_rend
+    dw [5 5]
+    dw [7 7 7 7 7]
+    dw [7 0 0 0 0]
+    dw [7 7 7 7 0]
+    dw [7 0 0 0 0]
+    dw [7 0 0 0 0]
+
+.letterG_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 0]
+    dw [7 0 0 7 7]
+    dw [7 0 0 0 7]
+    dw [0 7 7 7 0]
+
+.letterH_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 7 7 7 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+
+.letterI_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 7 7 7 0]
+.letterJ_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [7 0 7 0 0]
+    dw [0 7 7 0 0]
+
+.letterK_rend
+    dw [5 5]
+    dw [7 0 0 7 0]
+    dw [7 0 7 0 0]
+    dw [7 7 0 0 0]
+    dw [7 0 7 0 0]
+    dw [7 0 0 7 0]
+
+.letterL_rend
+    dw [5 5]
+    dw [7 0 0 0 0]
+    dw [7 0 0 0 0]
+    dw [7 0 0 0 0]
+    dw [7 0 0 0 0]
+    dw [7 7 7 0 0]
+.letterM_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [7 7 0 7 7]
+    dw [7 0 7 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+.letterN_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [7 7 0 0 7]
+    dw [7 0 7 0 7]
+    dw [7 0 0 7 7]
+    dw [7 0 0 0 7]
+.letterO_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [0 7 7 7 0]
+.letterP_rend
+    dw [5 5]
+    dw [7 7 7 0 0]
+    dw [7 0 0 7 0]
+    dw [7 7 7 0 0]
+    dw [7 0 0 0 0]
+    dw [7 0 0 0 0]
+.letterQ_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 0 7 0 7]
+    dw [7 0 0 7 0]
+    dw [0 7 7 0 7]
+.letterR_rend
+    dw [5 5]
+    dw [7 7 7 0 0]
+    dw [7 0 0 7 0]
+    dw [7 7 7 0 0]
+    dw [7 0 0 7 0]
+    dw [7 0 0 7 0]
+.letterS_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 0]
+    dw [0 7 7 7 0]
+    dw [0 0 0 0 7]
+    dw [0 7 7 7 0]
+.letterT_rend
+    dw [5 5]
+    dw [7 7 7 7 7]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+.letterU_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [0 7 7 7 7]
+.letterV_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [0 7 0 7 0]
+    dw [0 7 0 7 0]
+    dw [0 0 7 0 0]
+.letterW_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 7 0 7]
+    dw [7 7 0 7 7]
+
+.letterX_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [0 7 0 7 0]
+    dw [0 0 7 0 0]
+    dw [0 7 0 7 0]
+    dw [7 0 0 0 7]
+.letterY_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [0 7 0 7 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+.letterZ_rend
+    dw [5 5]
+    dw [7 7 7 7 7]
+    dw [0 0 0 7 0]
+    dw [0 0 7 0 0]
+    dw [0 7 0 0 0]
+    dw [7 7 7 7 7]
+.leftsquareParethesisSign
+    dw [5 5]
+    dw [0 7 7 0 0]
+    dw [0 7 0 0 0]
+    dw [0 7 0 0 0]
+    dw [0 7 0 0 0]
+    dw [0 7 7 0 0]
+.backSlashSign
+    dw [5 5]
+    dw [0 7 0 0 0]
+    dw [0 7 0 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 0 7 0]
+    dw [0 0 0 7 0]
+.rightsquareParethesisSign
+    dw [5 5]
+    dw [0 0 7 7 0]
+    dw [0 0 0 7 0]
+    dw [0 0 0 7 0]
+    dw [0 0 0 7 0]
+    dw [0 0 7 7 0]
+.upSign
+    dw [5 5]
+    dw [0 0 7 0 0]
+    dw [0 7 0 7 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+.downDashSign
+    dw [5 5]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [7 7 7 7 7]
+.sidequotesign
+    dw [5 5]
+    dw [0 7 0 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+.lletterA_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 7 7 7 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+
+.lletterB_rend
+    dw [5 5]
+    dw [7 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 7 7 7 7]
+
+.lletterC_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 0]
+    dw [7 0 0 0 7]
+    dw [0 7 7 7 0]
+
+.lletterD_rend
+    dw [5 5]
+    dw [7 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 7 7 7 0]
+
+.lletterE_rend
+    dw [5 5]
+    dw [7 7 7 7 7]
+    dw [7 0 0 0 0]
+    dw [7 7 7 7 0]
+    dw [7 0 0 0 0]
+    dw [7 7 7 7 7]
+
+.lletterF_rend
+    dw [5 5]
+    dw [7 7 7 7 7]
+    dw [7 0 0 0 0]
+    dw [7 7 7 7 0]
+    dw [7 0 0 0 0]
+    dw [7 0 0 0 0]
+
+.lletterG_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 0]
+    dw [7 0 0 7 7]
+    dw [7 0 0 0 7]
+    dw [0 7 7 7 0]
+
+.lletterH_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 7 7 7 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+
+.lletterI_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 7 7 7 0]
+.lletterJ_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [7 0 7 0 0]
+    dw [0 7 7 0 0]
+
+.lletterK_rend
+    dw [5 5]
+    dw [7 0 0 7 0]
+    dw [7 0 7 0 0]
+    dw [7 7 0 0 0]
+    dw [7 0 7 0 0]
+    dw [7 0 0 7 0]
+
+.lletterL_rend
+    dw [5 5]
+    dw [7 0 0 0 0]
+    dw [7 0 0 0 0]
+    dw [7 0 0 0 0]
+    dw [7 0 0 0 0]
+    dw [7 7 7 0 0]
+.lletterM_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [7 7 0 7 7]
+    dw [7 0 7 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+.lletterN_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [7 7 0 0 7]
+    dw [7 0 7 0 7]
+    dw [7 0 0 7 7]
+    dw [7 0 0 0 7]
+.lletterO_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [0 7 7 7 0]
+.lletterP_rend
+    dw [5 5]
+    dw [7 7 7 0 0]
+    dw [7 0 0 7 0]
+    dw [7 7 7 0 0]
+    dw [7 0 0 0 0]
+    dw [7 0 0 0 0]
+.lletterQ_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 7]
+    dw [7 0 7 0 7]
+    dw [7 0 0 7 0]
+    dw [0 7 7 0 7]
+.lletterR_rend
+    dw [5 5]
+    dw [7 7 7 0 0]
+    dw [7 0 0 7 0]
+    dw [7 7 7 0 0]
+    dw [7 0 0 7 0]
+    dw [7 0 0 7 0]
+.lletterS_rend
+    dw [5 5]
+    dw [0 7 7 7 0]
+    dw [7 0 0 0 0]
+    dw [0 7 7 7 0]
+    dw [0 0 0 0 7]
+    dw [0 7 7 7 0]
+.lletterT_rend
+    dw [5 5]
+    dw [7 7 7 7 7]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+.lletterU_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [0 7 7 7 7]
+.lletterV_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [0 7 0 7 0]
+    dw [0 7 0 7 0]
+    dw [0 0 7 0 0]
+.lletterW_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 0 0 7]
+    dw [7 0 7 0 7]
+    dw [7 7 0 7 7]
+
+.lletterX_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [0 7 0 7 0]
+    dw [0 0 7 0 0]
+    dw [0 7 0 7 0]
+    dw [7 0 0 0 7]
+.lletterY_rend
+    dw [5 5]
+    dw [7 0 0 0 7]
+    dw [0 7 0 7 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+.lletterZ_rend
+    dw [5 5]
+    dw [7 7 7 7 7]
+    dw [0 0 0 7 0]
+    dw [0 0 7 0 0]
+    dw [0 7 0 0 0]
+    dw [7 7 7 7 7]
+.figurerightParenthesisSign
+    dw [5 5]
+    dw [0 0 7 7 0]
+    dw [0 0 7 0 0]
+    dw [0 7 0 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 7 0]
+.straightLineSign
+    dw [5 5]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 7 0 0]
+.figureleftParenthesisSign
+    dw [5 5]
+    dw [0 7 7 0 0]
+    dw [0 0 7 0 0]
+    dw [0 0 0 7 0]
+    dw [0 0 7 0 0]
+    dw [0 7 7 0 0]
+.tildaSign
+    dw [5 5]
+    dw [0 7 0 0 0]
+    dw [7 0 7 0 7]
+    dw [0 0 0 7 0]
+    dw [0 0 0 0 0]
+    dw [0 0 0 0 0]
+.deleteSign
+    dw [5 5]
+    dw [7 7 0 7 0]
+    dw [7 0 7 7 0]
+    dw [7 7 0 7 0]
+    dw [0 0 0 7 0]
+    dw [0 0 0 7 7]
+//Font End ------------------------------------------------------------------------------
 
 //STDLIB-URCL v2 -------------------------------------------------------------------------
 
