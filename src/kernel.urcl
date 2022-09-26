@@ -750,9 +750,9 @@ MINSTACK 2048
 .version1 //pls dont change
 	dw ["RavenOS Version %s" 0xa0 0]
 .version2 //pls dont change
-	dw ["0.1.5 alpha" 0]
+	dw ["0.1.6 alpha" 0]
 .api_version //pls dont change
-	dw ["6" 0]
+	dw ["7" 0]
 .errorCode //change with llod
 	dw 0
 //Errors:
