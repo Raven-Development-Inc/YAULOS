@@ -517,7 +517,54 @@ MINSTACK 2048
 	ret
 .os_write_file
         ret
-// --------------------------------------------------------------------------
+	
+//Gfx ------------------------------------------------------------------------------------
+.render_sprite   
+    //@debug
+    psh r1 // pointer
+    psh r2 // off_x
+    psh r3 // off_y
+    psh r4 // h
+    lod r4 r1 // h = data[0]
+    psh r5 // w
+    llod r5 r1 1 // w = data[1]
+    psh r6 // y
+    imm r6 0
+    psh r7 // x
+    imm r7 0
+    psh r8 // additional info
+    add r1 r1 2 // ndata = data[2:]
+    out %buffer 1
+    .render_foryinrangeh
+       .render_foryinrangeh_forxinrangew
+           psh r7
+           add r7 r7 r2
+           out %x r7
+           pop r7
+           psh r6
+           add r6 r6 r3
+           out %y r6
+           pop r6
+           mlt r8 r6 r5
+           add r8 r8 r7
+           llod r8 r8 r1
+           out %color r8
+           inc r7 r7
+           bne .render_foryinrangeh_forxinrangew r7 r5
+       imm r7 0
+       inc r6 r6
+       bne .render_foryinrangeh r6 r4 
+    out %buffer 2
+    pop r8
+    pop r7
+    pop r6
+    pop r5
+    pop r4
+    pop r3
+    pop r2
+    pop r1
+    ret
+// ---------------------------------------------------------------------------------------
 
 
 // OS variables
@@ -536,7 +583,8 @@ MINSTACK 2048
 //3: OS ProdActivate Key failed (WIP)
 //4: Fatal Error: Kernel Panic call panic(void);
 //5: bad command
-//6: 
+//6: char doesn't exist
+//7: sprite doesn't exist
 
 
 //Shell Start ----------------------------------------------------------------------------
