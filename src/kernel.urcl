@@ -230,7 +230,8 @@ MINSTACK 2048
 	STR .errorCode 1
 	RET
 .Ins_SystemCall_InvalidSyscall2
-	str errorCode 
+	str errorCode 8
+	ret
 //----------------------------------------------------------------------------------------
 
 
@@ -567,6 +568,7 @@ MINSTACK 2048
     pop r2
     pop r1
     ret
+   
 // ---------------------------------------------------------------------------------------
 //Wrappers -------------------------------------------------------------------------------
 .Halt
@@ -576,7 +578,207 @@ MINSTACK 2048
 .Free
 	cal .free
 //----------------------------------------------------------------------------------------
+// Window support(WIP) -------------------------------------------------------------------
+.window_render //Render Window
+    psh r1 //window
+    psh r2
+    psh r3
+    llod r2 r1 1
+    llod r3 r1 2
+    lod r1 r1
+    cal .render_sprite
+    pop r3
+    pop r2
+    pop r1
+    psh r1
+    psh r2
+    psh r3
+    llod r2 r1 3 // buttons *
+    
+    .window_render_rereimplement__cycle
+        lod r3 r2
+        bre .window_render_rereimplement__end r3 0
+       // hlt
+        psh r1
+        psh r2
+        psh r3
+        mov r3 r1
+        mov r1 r2
+        mov r2 r3
+        cal .button_render
+        inc r2 r2
+        jmp .window_render_rereimplement__cycle
+    .window_render_rereimplement__end
+    pop r3
+    pop r2
+    pop r1
+    pop r3
+    pop r2
+    pop r1
+    ret
+    
+.button_render //Render a button
+    psh r1 // button*
+    psh r2 // window*
+    psh r3 // additional
+    psh r4
+    psh r5 // wx
+    psh r6 // wy
+    bre .button_render__end r1 0
+    llod r5 r2 1
+    llod r6 r2 2 // init of offsetted x & y
+    lod r1 r1
+    
+    llod r3 r1 0 // x
+    add r2 r3 r5
+    llod r4 r1 1 // y
+    add r3 r4 r6
 
+    llod r1 r1 4 // graphics*, but we need to get x and y into R2 and R3 first
+    cal .render_sprite
+    .button_render__end
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	ret
+
+.button_fill //Fill a button with color
+    psh r1 // button *
+    psh r2 // color
+    psh r3 // additional info
+    psh r4
+    psh r5
+    lod r1 r1
+    llod r1 r1 4 // graphics *
+    lod r4 r1
+    llod r5 r1 1
+    mlt r4 r4 r5
+    add r1 r1 2
+    .button_fill__loop1
+        str r1 r2
+        dec r4 r4
+        bre .button_fill__end r4 0
+        inc r1 r1
+        jmp .button_fill__loop1
+    .button_fill__end
+        pop r5
+        pop r4
+        pop r3
+        pop r2
+        pop r1
+        ret
+
+.index_of_0 //idk
+    psh r1 // ptr
+    psh r2 // additional
+    psh r3 // additional
+    imm r3 0
+    .index_of_0__loop1
+        llod r2 r1 r3
+        brz .index_of_0_found r2
+        inc r3 r3
+        jmp .index_of_0__loop1
+    .index_of_0_found
+        mov r1 r3
+        pop r3
+        pop r2
+        pop r9
+        ret
+	
+.button_create //Create a button in window
+    psh r1 // window*
+    psh r2 // x
+    psh r3 // y
+    psh r4 // h
+    psh r5 // w
+    psh r6
+    //psh r1
+    add r1 r1 3 // button ***
+    lod r1 r1
+    psh r1
+    cal .index_of_0
+    pop r6 // r1 - index for button to placed at, r2 - button **
+    add r1 r1 r6 // pointer for button to placed at
+    mov r6 r1
+    imm r1 5
+    cal .malloc
+    str r1 r2
+    lstr r1 1 r3
+    lstr r1 2 r4
+    lstr r1 3 r5
+    mov r2 r1
+    mlt r1 r4 r5
+    add r1 r1 2
+    cal .malloc
+    str r1 r4
+    lstr r1 1 r5
+    lstr r2 4 r1
+    str r6 r2
+    mov r1 r6
+    pop r6
+    pop r5
+    pop r4
+    pop r3
+    pop r2
+    pop r9
+    ret
+    
+.window_create //Create Window
+    psh r1 // h
+    psh r2 // w
+    psh r3 // additional data
+    mlt r3 r2 r1
+    psh r1
+    mov r1 r3
+    add r1 r1 2
+    cal .malloc
+    mov r3 r1
+    pop r1
+    lstr r3 0 r1
+    lstr r3 1 r2 // r1, r2 - useless, r3 - graphics*
+    imm r1 4
+    cal .malloc
+    str r1 r3
+    lstr r1 1 0
+    lstr r1 2 0
+    mov r2 r1
+    imm r1 16 // buttons
+    cal .malloc
+    lstr r2 3 r1
+    pop r3
+    mov r1 r2
+    pop r2
+    pop r9
+    ret
+
+.window_fill_reimplement
+    psh r1 // window*
+    psh r2 // color
+    psh r3 // additional reg
+    psh r4 // additional reg
+    lod r3 r1
+    lod r4 r3
+    llod r3 r3 1
+    mlt r3 r3 r4 // total size
+    lod r1 r1
+    add r1 r1 2 
+    .window_fill_reimplement__loop1
+        str r1 r2
+        dec r3 r3
+        bre .window_create_reimplement__end r3 0
+        inc r1 r1
+        jmp .window_fill_reimplement__loop1
+    .window_create_reimplement__end
+        pop r4
+        pop r3
+        pop r2
+        pop r1
+        ret
+
+//----------------------------------------------------------------------------------------
 // OS variables
 .version1 //pls dont change
 	dw ["RavenOS Version %s" 0xa0 0]
