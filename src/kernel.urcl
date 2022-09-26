@@ -111,7 +111,7 @@ MINSTACK 2048
 //program binary location
 //Heap location
 //Stack location
-//Memory access(protection level 0 = like fuck u, you only can use stack. 15 = aight use whatever the hell you want)
+//Memory access(protection level 0 = like fuck u, you only can use heap+stack+dw values. 15 = aight use whatever the hell you want)
 //Error status
 //Registers using (1-15)
 
