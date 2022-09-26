@@ -102,10 +102,18 @@ MINSTACK 2048
 .Process_Descriptor_table //pointers to the proccess descripters
     DW [ 0 0 0 0 0 0 0 0 0 0 ] //descriptor pointer cannot be a 0, because 0 = free
     
-//Procces descriptor format
-//PID: Any number not zero, zero is the OS
-//Name: Pointer to a string
-//
+//Process descriptor format:
+//PID
+//Start of program
+//Name of program (string pointer)
+//Current read address
+//dw value location
+//program binary location
+//Heap location
+//Stack location
+//Memory access(protection level 0 = like fuck u, you only can use stack. 15 = aight use whatever the hell you want)
+//Error status
+//Registers using (1-15)
 
 
 .Scal
