@@ -147,8 +147,9 @@ MINSTACK 2048
 
 .Scal
 	
-	brg .Ins_SystemCall_InvalidSyscall R1 36
-	
+	brg .Ins_SystemCall_InvalidSyscall r1 15
+	brl .Ins_SystemCall_InvalidSyscall2 r1 15
+	llod r15 
 
 .And
 	add R3 R3 .VirtualRegisters
@@ -228,6 +229,8 @@ MINSTACK 2048
 .Ins_SystemCall_InvalidSyscall
 	STR .errorCode 1
 	RET
+.Ins_SystemCall_InvalidSyscall2
+	str errorCode 
 //----------------------------------------------------------------------------------------
 
 
@@ -592,6 +595,7 @@ MINSTACK 2048
 //5: bad command
 //6: char doesn't exist
 //7: sprite doesn't exist
+//8: syscall ident cant be a negative
 
 
 //Shell Start ----------------------------------------------------------------------------
