@@ -726,6 +726,17 @@ MINSTACK 2048
         pop r1
         ret
 // ---------------------------------------------------------------------------------------
+//Mouse ----------------------------------------------------------------------------------
+.mouse_scan
+	psh r1
+	in r1 %MOUSE_X
+	lstr .mouse_x_y 0 r1
+	in r1 %MOUSE_Y
+	lstr .mouse_x_y 1 r1
+	in r1 %MOUSE_BUTTONS
+	str .mouse_button_status r1
+	pop r1
+	ret
 //----------------------------------------------------------------------------------------
 // OS variables
 .version1 //pls dont change
