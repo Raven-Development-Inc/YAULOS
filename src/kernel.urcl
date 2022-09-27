@@ -118,9 +118,9 @@ MINSTACK 2048
 
 .Scal
 	
-	brg .Ins_SystemCall_InvalidSyscall r1 15
-	brl .Ins_SystemCall_InvalidSyscall2 r1 15
-	llod r15 .Syscalls r1
+	brg .Ins_SystemCall_InvalidSyscall r14 15
+	brl .Ins_SystemCall_InvalidSyscall2 r14 15
+	llod r15 .Syscalls r14
 	call r15
 
 //----------------------------------------------------------------------------------------
