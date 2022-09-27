@@ -2441,6 +2441,23 @@ ret
     pop r2
     pop r9
     ret
+    
+.pow
+    psh r1 // short n
+    psh r2 // short p
+    psh r3 // output
+    imm r3 1
+    .pow_loop
+        brz .pow_end r2
+        mlt r3 r3 r1
+        dec r2 r2
+        jmp .pow_loop
+    .pow_end
+        mov r1 r3
+        pop r3
+        pop r2
+        pop r0
+        ret
 //EOF -----------------------------------------------------------------------------------
 .print_str
     // input data: r1 -> char*
