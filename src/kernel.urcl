@@ -1,12 +1,14 @@
-// UCOS 0.1.5
+// UCOS 0.1.6
 //Vibe to this shit thats on fire if ur reading: https://www.youtube.com/watch?v=TeXqIhG0888&list=PL3HjO-9hp7nwftlikzs5dNX58olyahWly&index=5
 
 // Assembly headers
 BITS == 16
-MINREGS 16
+MINREG 16
 MINHEAP 32768
-MINSTACK 2048 
+MINSTACK 2048
 RUN ROM
+
+
 
 //macros
 //malloc
@@ -88,8 +90,6 @@ RUN ROM
 @DEFINE b2 25
 @DEFINE c2 26
 @DEFINE len r8
-@DEFINE i r7
-
 .sys_vars
     dw 0
 .mouse_x_y
@@ -117,29 +117,13 @@ RUN ROM
 //Registers using (1-15)
 
 
-.Scal
-	
-	brg .Ins_SystemCall_InvalidSyscall r1 15
-	brl .Ins_SystemCall_InvalidSyscall2 r1 15
-	llod r15 .Syscalls r1
-	call r15
-
-//----------------------------------------------------------------------------------------
-//Errors ---------------------------------------------------------------------------------
-.Ins_SystemCall_InvalidSyscall
-	STR .errorCode 1
-	RET
-.Ins_SystemCall_InvalidSyscall2
-	str errorCode 8
-	ret
-//----------------------------------------------------------------------------------------
 
 
 //OS Vars
 .Bits
 	dw @bits
-.MinRegs
-	dw @minregs
+.MinReg
+	dw @minreg
 .MinStack
 	dw @minstack
 .MinHeap
@@ -173,14 +157,12 @@ RUN ROM
 		dw ["90% done" 0]
 	.e10
 		dw ["File system installed, creating root directory..." 0]
-	.e11
-		dw ["SimplexFS setup finished, loading programs from ROM..." 0]
 	.e12
 		dw ["Programs installed, loading shell.exe..." 0]
 	.e13
 		dw ["Shell loaded, starting, enjoy session %d - User: %s" 0]
 
-.Syscalls //13 sys calls so far, expanding the fs right now
+.Syscalls //13 sys calls so far, expanding the fs right now (2 wrappers, they don't count)
 	dw .os_get_api_version //1
 	dw .os_get_ucos_version //2
 	dw .os_error //3
@@ -194,26 +176,49 @@ RUN ROM
 	dw .os_delete_dir //11
 	dw .os_change_dir //12
 	dw .os_print_wd //13
+	dw .render_sprite //14
+	dw .window_render //15
+	
 	//Wrappers to interact with stdlib
-	dw .Malloc //14
-	dw .Free //15
+	dw .Malloc
+	dw .Free
+	dw .Defrag
+
+//boot
+jmp .Init
 // Code
 .Init
 	cal .init_malloc
 	cal .os_get_ucos_version
+        cal .os_format_disk
 	jmp .Init //infinite loop, not done yet
 	
 // Some syscalls ------------------------------------------------------------
+.Scal
+	
+	brg .Ins_SystemCall_InvalidSyscall r1 15
+        .scal_1
+	llod r15 .Syscalls r1
+	cal r15
+        ret
+
+//----------------------------------------------------------------------------------------
+//Errors ---------------------------------------------------------------------------------
+.Ins_SystemCall_InvalidSyscall
+	STR .errorCode 1
+	jmp .scal_1
+
+//----------------------------------------------------------------------------------------
 
 //Misc------------------------------------------------------------------------------------
 .os_get_ucos_version //Print ucos Version
 	imm r1 .version1
 	psh .version2
-	cal printf
+	cal .printf
 	ret
 .os_get_api_version //Prints API version
-	imm r1, api_version
-	cal printf
+	imm r1, .api_version
+	cal .printf
 	ret
 .os_error //Error code goes in .errorCode use llod to change it(is an int bc memory constraints)
 	psh r1
@@ -233,7 +238,7 @@ RUN ROM
 	out %bus r2
 	ret
 	
-.os_change_page //IN: r1 = page num(8192 byte pages)
+.os_change_page //IN: r1 = page num(65536 byte pages)
 	out %page r1
 	ret
 	
@@ -477,6 +482,9 @@ RUN ROM
 	cal .malloc
 .Free
 	cal .free
+.Defrag
+	cal .defragm
+
 //----------------------------------------------------------------------------------------
 // Window support(WIP) -------------------------------------------------------------------
 .window_render //Render Window
@@ -678,18 +686,7 @@ RUN ROM
         pop r1
         ret
 
-.window_render //RENDER THE F-ING WINDOW YOU SU- im sorry my bad
-    psh r1 //window*
-    psh r2
-    psh r3
-    llod r2 r1 1
-    llod r3 r1 2
-    lod r1 r1
-    cal .render_sprite
-    pop r3
-    pop r2
-    pop r1
-    ret
+
 
 //----------------------------------------------------------------------------------------
 //Renders --------------------------------------------------------------------------------
@@ -749,7 +746,7 @@ RUN ROM
 //----------------------------------------------------------------------------------------
 // OS variables
 .version1 //pls dont change
-	dw ["RavenOS Version %s" 0xa0 0]
+	dw ["UCOS Version %s" 0xa0 0]
 .version2 //pls dont change
 	dw ["0.1.6 alpha" 0]
 .api_version //pls dont change
@@ -2426,7 +2423,7 @@ ret
         cal .error
         hlt
     .error
-        imm R1 error_str
+        imm R1 .error_str
         cal .printf
         ret
     .error_str
@@ -2624,8 +2621,7 @@ DW [ 0 d4     ds1 d4  0 d8    d1 d4   0 d8 ]
 DW [ c1 d4    0 d2    0 d4 ]
 .bar14
 DW [ c1 d8    c1 d8   0 d8    c1 d8   0 d8    c1 d8   d1 d4 ]
-.end
-DW
+
 
 .play
     SUB r1 len 20
