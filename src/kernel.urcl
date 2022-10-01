@@ -1,4 +1,4 @@
-// UCOS 0.1.6
+// UCOS Lite 0.1.6
 //Vibe to this shit thats on fire if ur reading: https://www.youtube.com/watch?v=TeXqIhG0888&list=PL3HjO-9hp7nwftlikzs5dNX58olyahWly&index=5
 
 // Assembly headers
@@ -90,12 +90,19 @@ RUN ROM
 @DEFINE b2 25
 @DEFINE c2 26
 @DEFINE len r8
-.sys_vars
-    dw 0
-.mouse_x_y
-    dw [0 0]
-.mouse_button_status
-    dw 0
+
+//MM
+@define Stack 65535
+@define Heap 8192
+@define DWValues 0
+
+//Byte code
+@define StackBase 8192
+@define StackSize 4096
+@define ProgramBase 12288
+@define maxProgSize 32768
+@define ip r7
+@define stackp r8
 
 .VirtualRegisters //For processing
     DW [ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ] // R0 - R15
@@ -115,10 +122,7 @@ RUN ROM
 //Memory access(protection level 0 = like fuck u, you only can use heap+stack+dw values. 15 = aight use whatever the hell you want)
 //Error status
 //Registers using (1-15)
-
-
-
-
+	
 //OS Vars
 .Bits
 	dw @bits
@@ -128,6 +132,19 @@ RUN ROM
 	dw @minstack
 .MinHeap
 	dw @minheap
+	
+.Variable_Address
+	dw 0
+.Result
+	dw 0
+.CurrentInst
+.sys_vars
+    dw 0
+.mouse_x_y
+    dw [0 0]
+.mouse_button_status
+    dw 0
+
 
 .currentDirectory
         dw 0 //root dir = 0th dir current DIR is the Index of the directory
@@ -184,6 +201,24 @@ RUN ROM
 	dw .Free
 	dw .Defrag
 
+.InstructionTable
+	dw .push
+	dw .pop
+	dw .add
+	dw .sub
+	dw .mul
+	dw .div
+	dw .jmp
+	dw .brz
+	dw .brg
+	dw .brl
+	dw .bre
+	dw .drop
+	dw .rotate
+	dw .duplicate
+	
+	
+
 //boot
 jmp .Init
 // Code
@@ -192,7 +227,16 @@ jmp .Init
 	cal .os_get_ucos_version
         cal .os_format_disk
 	jmp .Init //infinite loop, not done yet
+
+//Instructions
+//r7 = ip
+//r8 = sp
+//r9 = temp
 	
+.push
+	inc r7 r7 
+	lod r9 r7
+
 // Some syscalls ------------------------------------------------------------
 .Scal
 	
