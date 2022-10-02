@@ -142,6 +142,10 @@ RUN ROM
     dw [0 0]
 .mouse_button_status
     dw 0
+.flag
+	dw 0
+.Virtualregs
+	dw [0 0 0 0]
 
 
 .currentDirectory
@@ -193,6 +197,8 @@ RUN ROM
 	dw .os_print_wd //13
 	dw .render_sprite //14
 	dw .window_render //15
+	dw .button_render //16
+	dw .button_fill
 	
 	//Wrappers to interact with stdlib
 	dw .Malloc
@@ -208,9 +214,15 @@ RUN ROM
 	dw .div
 	dw .goto
 	dw .gotoif
+	dw .lt
+	dw .eq
+	dw .gt
+	dw .zero
+	dw .notzero
 	dw .drop
 	dw .rotate
 	dw .duplicate
+	dw .end
 	
 	
 
@@ -222,7 +234,15 @@ jmp .Init
 	cal .os_get_ucos_version
         cal .os_format_disk
 	imm stackp .StackBase
-	jmp .Init //infinite loop, not done yet
+	jmp .ShellInit //infinite loop, not done yet
+
+//The shell
+.ShellInit
+	jmp .Shell
+.Shell
+	jmp .ShellEnd
+.ShellEnd
+	hlt
 
 //Bytecode interpreter
 //https://en.wikipedia.org/wiki/Threaded_code
@@ -235,11 +255,14 @@ jmp .Init
 		inc ip ip
 		jmp ip
 	.dispatch
+		inc r7 r7
 		lod r11 ip //load current instruction into r11
 		imm r9 .InstructionTable
 		add r10 r11 r9 //add offset
 		xor r9 r9
 		jmp r10 //jump to instruction
+	.InterpreteEnd
+		jmp .Shell
 	
 //Instructions
 //r7 = ip
@@ -247,17 +270,77 @@ jmp .Init
 //r9 = temp
 //r10 = temp2
 //r12 = operand 1
-//r13 = operand 2	
+//r13 = operand 2
+//r4 = operand 3 
+//r5 = operand 4
+//.Result = result of operations
 .push
 	inc r7 r7
 	lod r9 r7
 	str r8 r9
 	xor r9 r9
 	inc r8 r8
-.pop
-	dec r8 r8
-	lod r
+	jmp .dispatch
 	
+.pop
+	inc r7 r7
+	lod r10 r7
+	bre .Pop_loop1 r10 1 
+	bre .Pop_loop2 r10 2
+	bre .Pop_loop3 r10 3
+	bre .Pop_loop4 r10 4
+	.Pop_loop1
+		dec r8 r8
+		lod r12 r8
+	.Pop_loop2
+		dec r8 r8
+		lod r13 r8
+	.Pop_loop3
+		dec r8 r8
+		lod r4 r8
+	.Pop_loop4
+		dec r8 r8
+		lod r5 r8
+	
+	xor r9 r9
+	str r8 r9
+	xor r10 r10
+	jmp .dispatch
+
+.end
+	jmp .InterpreteEnd
+
+.add
+	jmp .pop
+	jmp .pop
+	add r9 r12 r13
+	str r8 r9
+	xor r9 r9
+	jmp .dispatch
+	
+.sub
+	jmp .pop
+	jmp .pop
+	sub r9 r12 r13
+	str r8 r9
+	xor r9 r9
+	jmp .dispatch
+	
+.mul
+	jmp .pop
+	jmp .pop
+	mlt r9 r12 r13
+	str r8 r9
+	xor r9 r9
+	jmp .dispatch
+	
+.div
+	jmp .pop
+	jmp .pop
+	div r9 r12 r13
+	str r8 r9
+	xor r9 r9
+	jmp .dispatch
 
 // Some syscalls ------------------------------------------------------------
 .Scal
@@ -751,6 +834,9 @@ jmp .Init
         pop r2
         pop r1
         ret
+	
+.change_color
+	str 
 
 
 
@@ -831,12 +917,6 @@ jmp .Init
 //8: syscall ident cant be a negative
 
 
-//Shell Start ----------------------------------------------------------------------------
-
-.Shell
-	jmp .ShellEnd
-.ShellEnd
-	jmp .Halt
 	
 //Shell End ------------------------------------------------------------------------------
 //Font -----------------------------------------------------------------------------------
