@@ -45,6 +45,8 @@ RUN ROM
 @define LAVENDER 13
 @define PINK 14
 @define LIGHTPEACH 15
+
+@define curcolor 0
 //floats
 @define F16PI 0x4248
 @define F16E  0x4170
