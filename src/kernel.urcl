@@ -99,13 +99,10 @@ RUN ROM
 //Byte code
 @define StackBase 8192
 @define StackSize 4096
-@define ProgramBase 12288
-@define maxProgSize 32768
 @define ip r7
 @define stackp r8
 
-.VirtualRegisters //For processing
-    DW [ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ] // R0 - R15
+
 
 .Process_Descriptor_table //pointers to the proccess descripters
     DW [ 0 0 0 0 0 0 0 0 0 0 ] //descriptor pointer cannot be a 0, because 0 = free
@@ -137,7 +134,8 @@ RUN ROM
 	dw 0
 .Result
 	dw 0
-.CurrentInst
+.CurChar
+	dw 0
 .sys_vars
     dw 0
 .mouse_x_y
@@ -208,11 +206,8 @@ RUN ROM
 	dw .sub
 	dw .mul
 	dw .div
-	dw .jmp
-	dw .brz
-	dw .brg
-	dw .brl
-	dw .bre
+	dw .goto
+	dw .gotoif
 	dw .drop
 	dw .rotate
 	dw .duplicate
@@ -226,16 +221,43 @@ jmp .Init
 	cal .init_malloc
 	cal .os_get_ucos_version
         cal .os_format_disk
+	imm stackp .StackBase
 	jmp .Init //infinite loop, not done yet
 
+//Bytecode interpreter
+//https://en.wikipedia.org/wiki/Threaded_code
+//go to the "Token threaded" part and read
+.InterpretLoop
+	//r6 = pointer to start of thread
+	//r11 = current instruction
+	.start: //prepare thread and start execution
+		lod ip r6
+		inc ip ip
+		jmp ip
+	.dispatch
+		lod r11 ip //load current instruction into r11
+		imm r9 .InstructionTable
+		add r10 r11 r9 //add offset
+		xor r9 r9
+		jmp r10 //jump to instruction
+	
 //Instructions
 //r7 = ip
 //r8 = sp
 //r9 = temp
-	
+//r10 = temp2
+//r12 = operand 1
+//r13 = operand 2	
 .push
-	inc r7 r7 
+	inc r7 r7
 	lod r9 r7
+	str r8 r9
+	xor r9 r9
+	inc r8 r8
+.pop
+	dec r8 r8
+	lod r
+	
 
 // Some syscalls ------------------------------------------------------------
 .Scal
