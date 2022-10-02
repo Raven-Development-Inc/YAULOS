@@ -183,7 +183,7 @@ RUN ROM
 	.e13
 		dw ["Shell loaded, starting, enjoy session %d - User: %s" 0]
 
-.Syscalls //13 sys calls so far, expanding the fs right now (2 wrappers, they don't count)
+.Syscalls //25 sys calls so far, expanding the fs right now(< this is on hold) (3 wrappers, they don't count)
 	dw .os_get_api_version //1
 	dw .os_get_ucos_version //2
 	dw .os_error //3
@@ -200,12 +200,21 @@ RUN ROM
 	dw .render_sprite //14
 	dw .window_render //15
 	dw .button_render //16
-	dw .button_fill
+	dw .button_fill //17
+	dw .button_create //18
+	dw .window_create //19
+	dw .window_fill //20
+	dw .change_color //21
+	dw .index_of_0 //22
+	dw .mouse_scan //23
+	dw .render_letter //24
+	dw .render_string /25
 	
 	//Wrappers to interact with stdlib
 	dw .Malloc
 	dw .Free
-	dw .Defrag
+	dw .Defragm
+	
 
 .InstructionTable
 	dw .push
@@ -633,8 +642,47 @@ jmp .Init
 	cal .malloc
 .Free
 	cal .free
-.Defrag
+.Defragm
 	cal .defragm
+.Degfrag_global
+	cal .defragm_global
+.Fast_free
+	cal .fast_free
+.Float_new
+	cal .float_construct
+.Float_from_short
+	cal .f16_from_short
+.Float_to_int
+	cal .f16_to_int
+.Float_add
+	cal .f16_add
+.Float_sub
+	cal .f16_sub
+.Float_mul
+	cal .f16_mul
+.Assert
+	cal .assert_reg
+.Sqrt
+	cal .sqrt
+.Pow
+	cal .pow
+.print
+	cal .print_str
+.Printf
+	cal .printf
+.PrintInt
+	cal .print_int
+.StrLen
+	cal .strlen
+.StrCopy
+	cal .strcpy
+.MemCopy
+	cal .memcpy
+.Play
+	cal .play
+.Wait
+	cal .wait
+
 
 //----------------------------------------------------------------------------------------
 // Window support(WIP) -------------------------------------------------------------------
@@ -706,7 +754,7 @@ jmp .Init
 
 .button_fill //Fill a button with color
     psh r1 // button *
-    psh r2 // color
+    psh curcolor // color
     psh r3 // additional info
     psh r4
     psh r5
@@ -815,7 +863,7 @@ jmp .Init
 
 .window_fill //Fill a window with color lolol
     psh r1 // window*
-    psh r2 // color
+    psh curcolor // color
     psh r3 // additional reg
     psh r4 // additional reg
     lod r3 r1
@@ -838,7 +886,8 @@ jmp .Init
         ret
 	
 .change_color
-	str 
+	str curcolor r1
+	ret
 
 
 
