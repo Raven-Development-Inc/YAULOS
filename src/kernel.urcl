@@ -263,7 +263,7 @@ jmp .Init
 	cal .init_malloc
 	cal .os_get_ucos_version
         cal .os_format_disk
-	imm stackp .StackBase
+	imm stackp StackBase
 	jmp .ShellInit //infinite loop, not done yet
 
 //The shell
