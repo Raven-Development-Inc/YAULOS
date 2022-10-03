@@ -183,7 +183,7 @@ RUN ROM
 	.e13
 		dw ["Shell loaded, starting, enjoy session %d - User: %s" 0]
 
-.Syscalls //25 sys calls so far, expanding the fs right now(< this is on hold) (3 wrappers, they don't count)
+.Syscalls //25 sys calls so far, expanding the fs right now(< this is on hold) (22 wrappers, they don't count)
 	dw .os_get_api_version //1
 	dw .os_get_ucos_version //2
 	dw .os_error //3
@@ -211,9 +211,28 @@ RUN ROM
 	dw .render_string /25
 	
 	//Wrappers to interact with stdlib
-	dw .Malloc
-	dw .Free
-	dw .Defragm
+	dw .Malloc //26
+	dw .Free //27
+	dw .Defragm //28
+	dw .Defrag_global //29
+	dw .fast_free //30 
+	dw .Float_new //31 
+	dw .Float_add //32 
+	dw .Float_from_short //33 
+	dw .Float_mul //34 
+	dw .Float_sub //35 
+	dw .Float_to_int //36 
+	dw .Assert //37 
+	dw .Sqrt //38 
+	dw .Pow //39 
+	dw .print //40 
+	dw .Printf //41 
+	dw .PrintInt //42 
+	dw .StrLen //43 
+	dw .StrCopy //44 
+	dw .MemCopy //45 
+	dw .Play //46 
+	dw .Wait //47
 	
 
 .InstructionTable
