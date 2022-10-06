@@ -1,7 +1,8 @@
 # Universal Computer Operating System (UCOS)
 The Universal Computer OS is an operating system directed at all 16 or 24 bit URCL-compatible systems
 
-## Current Project: FABRIC interpreter
+## Current Project: Multiprocessing + FS + Program Execution
+### What's next: Shell
 
 # Specs
 - Language: URCL, BrainFuck++, FABRIC
