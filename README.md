@@ -16,3 +16,8 @@ The Universal Computer OS is an operating system directed at all 16 or 24 bit UR
 - Minimum System Requierments: 24 bits, 262144 bytes of RAM, 16 MiB Storage, 512x256 raster screen, at least 1 kHz clock speed 3 stage pipeline; 3 kHz preffered, URCL compatible, 24 registers
 - Filesystem: FAT Clone
 - ILs: Brainfuck, FABRIC
+
+# Upcoming Programs
+- ULisp = Minimal Lisp interpreter
+- UForth = Simple Forth compiler that compiles to FABRIC
+- MicroBasic = simple BASIC compiler that compiles to FABRIC
