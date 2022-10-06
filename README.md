@@ -21,3 +21,4 @@ The Universal Computer OS is an operating system directed at all 16 or 24 bit UR
 - ULisp = Minimal Lisp interpreter
 - UForth = Simple Forth compiler that compiles to FABRIC
 - MicroBasic = simple BASIC compiler that compiles to FABRIC
+- TextEdit = simple text editor
