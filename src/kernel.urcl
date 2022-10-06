@@ -9,7 +9,6 @@ MINSTACK 2048
 RUN ROM
 
 
-
 //macros
 //malloc
 @define MALLOC_MAINP M0
