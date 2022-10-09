@@ -371,6 +371,14 @@ jmp .Init
 	xor r9 r9
 	jmp .dispatch
 
+.goto
+	inc r7 r7
+	lod r9 r7
+	mov r7 r9
+	xor r9 r9
+	jmp .dispatch
+
+
 // Some syscalls ------------------------------------------------------------
 .Scal
 	
