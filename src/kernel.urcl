@@ -182,7 +182,7 @@ RUN ROM
 	.e13
 		dw ["Shell loaded, starting, enjoy session %d - User: %s" 0]
 
-.Syscalls //25 sys calls so far, expanding the fs right now(< this is on hold) (22 wrappers, they don't count)
+.Syscalls //34 sys calls so far, expanding the fs right now (22 wrappers, they don't count)
 	dw .os_get_api_version //1
 	dw .os_get_ucos_version //2
 	dw .os_error //3
@@ -208,30 +208,39 @@ RUN ROM
 	dw .mouse_scan //23
 	dw .render_letter //24
 	dw .render_string /25
+	dw .INode_new //26
+	dw .INode_isdir //27
+	dw .INode_direct_blocks //28
+	dw .INode_find_direct_block //29
+	dw .INode_add_block //30
+	dw .INode_adjust_size //31
+	dw .INode_increment_size //32
+	dw .INode_truncate //33
+	dw .INode_truncate_temp_mem //34
 	
 	//Wrappers to interact with stdlib
-	dw .Malloc //26
-	dw .Free //27
-	dw .Defragm //28
-	dw .Defrag_global //29
-	dw .fast_free //30 
-	dw .Float_new //31 
-	dw .Float_add //32 
-	dw .Float_from_short //33 
-	dw .Float_mul //34 
-	dw .Float_sub //35 
-	dw .Float_to_int //36 
-	dw .Assert //37 
-	dw .Sqrt //38 
-	dw .Pow //39 
-	dw .print //40 
-	dw .Printf //41 
-	dw .PrintInt //42 
-	dw .StrLen //43 
-	dw .StrCopy //44 
-	dw .MemCopy //45 
-	dw .Play //46 
-	dw .Wait //47
+	dw .Malloc //35
+	dw .Free //36
+	dw .Defragm //37
+	dw .Defrag_global //38
+	dw .fast_free //39
+	dw .Float_new //40
+	dw .Float_add //41 
+	dw .Float_from_short //42
+	dw .Float_mul //43
+	dw .Float_sub //44 
+	dw .Float_to_int //45 
+	dw .Assert //46
+	dw .Sqrt //47
+	dw .Pow //48
+	dw .print //49 
+	dw .Printf //50 
+	dw .PrintInt //51 
+	dw .StrLen //52
+	dw .StrCopy //53 
+	dw .MemCopy //54 
+	dw .Play //55
+	dw .Wait //56
 	
 
 .InstructionTable
@@ -613,6 +622,135 @@ jmp .Init
 .os_write_file
         ret
 	
+	
+//FS stuff
+.INode_new  
+    /*
+        u16 mode
+        u16 hard_links
+        u16 uid
+        u16 gid
+        u16 block_count
+        u16 size
+        u16 direct_blocks
+        u16 indirect_block
+        u16 double_indirect_block
+    */
+    imm r1 9
+    cal .malloc
+    lstr r1 0 0 // idk libc::mode_t
+    lstr r1 1 1 // hard_links
+    lstr r1 2 0 // uid
+    lstr r1 3 0 // gid
+    lstr r1 4 0 // block_count
+    lstr r1 5 0 // size
+    psh r1
+    imm r1 12
+    cal .malloc
+    mov r2 r1
+    pop r1
+    lstr r1 6 r2 // direct_blocks
+    lstr r1 7 0 // indirect_block
+    lstr r1 8 0 // double_indirect_block
+    ret
+
+.INode_isdir
+    llod r1 sp 1
+    lod r1 r1
+    and r1 r1 0x4000 // S_IFDIR
+    setne r1 r1 0
+    and r1 r1 1
+    ret
+
+.INode_direct_blocks
+    llod r3 sp 1 // self
+    imm r1 12
+    cal .malloc
+    imm r2 0
+    imm r5 12
+    llod r3 r3 6
+    .INode_direct_blocks_loop1
+        lod r4 r3
+        brz .INode_direct_blocks_loop1_end r5
+        bne .INode_direct_blocks_loop1_write r4 0
+        dec r5 r5
+        inc r3 r3
+        jmp .INode_direct_blocks_loop1
+        .INode_direct_blocks_loop1_write
+            dec r5 r5
+            inc r3 r3
+            lstr r1 r2 r4
+            inc r2 r2
+            jmp .INode_direct_blocks_loop1
+    .INode_direct_blocks_loop1_end
+    ret
+
+.INode_find_direct_block
+    // arg1 = self
+    // arg2 = index
+    llod r1 sp 1
+    llod r2 sp 2
+    llod r1 r1 6
+    llod r1 r1 r2
+    ret
+.INode_add_block
+    
+    llod r2 sp 1 // self 
+    llod r1 sp 2 // index
+    llod r3 sp 3
+    brg .INode_add_block_error r1 12
+    llod r2 r2 6
+    lstr r2 r1 r3
+    ret
+    .INode_add_block_error
+        out %text 'N'
+        out %text 'S'
+        out %text 'D'
+        out %text 'B'
+        hlt        
+
+.INode_adjust_size
+    llod r1 sp 1 // self
+    llod r2 sp 2 // nsize
+    llod r3 r1 5
+    bge .INode_adjust_size_end r3 r2
+    lstr r1 5 r2
+    div r2 r2 512
+    inc r2 r2
+    lstr r1 4 r2
+    .INode_adjust_size_end
+    ret
+
+.INode_increment_size
+    llod r1 sp 1
+    llod r2 sp 2
+    llod r3 r1 5
+    add r3 r3 r2
+    lstr r1 5 r3
+    div r3 r3 512
+    inc r3 r3
+    lstr r1 4 r3
+    ret
+
+.INode_truncate
+    llod r1 sp 1
+    lstr r1 5 0
+    lstr r1 4 0
+    str .INode_truncate_temp_mem r1
+    psh r1
+    cal .INode_direct_blocks
+    lod r1 .INode_truncate_temp_mem
+    psh r1
+    imm r1 12
+    cal .malloc
+    mov r2 r1
+    pop r1
+    lstr r1 6 r2
+    ret 
+
+.INode_truncate_temp_mem
+    dw 0
+
 //Gfx ------------------------------------------------------------------------------------
 .render_sprite   
     //@debug
