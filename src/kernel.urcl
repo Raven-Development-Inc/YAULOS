@@ -176,11 +176,7 @@ RUN ROM
 	.e9
 		dw ["90% done" 0]
 	.e10
-		dw ["File system installed, creating root directory..." 0]
-	.e12
-		dw ["Programs installed, loading shell.exe..." 0]
-	.e13
-		dw ["Shell loaded, starting, enjoy session %d - User: %s" 0]
+		dw ["File System Installed. Login: " 0]
 
 .Syscalls //34 sys calls so far, expanding the fs right now (22 wrappers, they don't count)
 	dw .os_get_api_version //1
@@ -353,6 +349,7 @@ jmp .Init
 	jmp .pop
 	add r9 r12 r13
 	str r8 r9
+	inc r8 r8
 	xor r9 r9
 	jmp .dispatch
 	
@@ -361,6 +358,7 @@ jmp .Init
 	jmp .pop
 	sub r9 r12 r13
 	str r8 r9
+	inc r8 r8
 	xor r9 r9
 	jmp .dispatch
 	
@@ -369,6 +367,7 @@ jmp .Init
 	jmp .pop
 	mlt r9 r12 r13
 	str r8 r9
+	inc r8 r8
 	xor r9 r9
 	jmp .dispatch
 	
@@ -377,6 +376,7 @@ jmp .Init
 	jmp .pop
 	div r9 r12 r13
 	str r8 r9
+	inc r8 r8
 	xor r9 r9
 	jmp .dispatch
 
