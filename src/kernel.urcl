@@ -1,6 +1,9 @@
 // UCOS Lite 0.2.0
 //Vibe to this shit thats on fire if ur reading: https://www.youtube.com/watch?v=TeXqIhG0888&list=PL3HjO-9hp7nwftlikzs5dNX58olyahWly&index=5
 
+//Bumps:
+//Bump 1
+
 // Assembly headers
 BITS == 16
 MINREG 16
