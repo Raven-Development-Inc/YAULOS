@@ -23,8 +23,8 @@ RUN ROM
 @define dx r12
 @define dy r11
 @define sx r10
-@define sy r9
-@define cx r8
+@define sy temp
+@define cx stackp
 @define cy r7
 @define x r6
 @define y r5
@@ -53,8 +53,9 @@ RUN ROM
 @define F16PI 0x4248
 @define F16E  0x4170
 @define NAN   0x7fff
-//disk
-@define diskstart 258
+
+// disk
+// @define diskstart 258
 
 //sounds
 
@@ -93,7 +94,7 @@ RUN ROM
 @DEFINE as2 24
 @DEFINE b2 25
 @DEFINE c2 26
-@DEFINE len r8
+@DEFINE len stackp
 
 //MM
 @define Stack 65535
@@ -103,10 +104,30 @@ RUN ROM
 //Byte code
 @define StackBase 8192
 @define StackSize 4096
-@define ip r7
-@define stackp r8
+@define ip 0
+@define stackp 0
 
+@define gen1 0
+@define gen2 0
+@define gen3 0
+@define gen4 0
 
+@define flag 0
+
+@define cur_inst 0
+
+@define temp 0
+@define temp2 0
+
+//More Regs
+@define reg17 0
+@define reg18 0
+@define reg19 0
+@define reg20 0
+@define reg21 0
+@define reg22 0
+@define reg23 0
+@define reg24 0
 
 .Process_Descriptor_table //pointers to the proccess descripters
     DW [ 0 0 0 0 0 0 0 0 0 0 ] //descriptor pointer cannot be a 0, because 0 = free
@@ -136,20 +157,13 @@ RUN ROM
 	
 .Variable_Address
 	dw 0
-.Result
-	dw 0
-.CurChar
-	dw 0
 .sys_vars
     dw 0
 .mouse_x_y
     dw [0 0]
 .mouse_button_status
     dw 0
-.flag
-	dw 0
-.Virtualregs
-	dw [0 0 0 0]
+
 
 
 .currentDirectory
@@ -243,6 +257,7 @@ RUN ROM
 	
 
 .InstructionTable
+	//stack based operations(0-15)
 	dw .push
 	dw .pop
 	dw .add
@@ -259,7 +274,10 @@ RUN ROM
 	dw .drop
 	dw .rotate
 	dw .duplicate
+	
+	//Global operations(16-17)
 	dw .end
+	dw .int
 	
 	
 
@@ -287,61 +305,57 @@ jmp .Init
 .InterpretLoop
 	//r6 = pointer to start of thread
 	//r11 = current instruction
+	jmp start
 	.start: //prepare thread and start execution
 		lod ip r6
 		inc ip ip
 		jmp ip
 	.dispatch
-		inc r7 r7
-		lod r11 ip //load current instruction into r11
-		imm r9 .InstructionTable
-		add r10 r11 r9 //add offset
-		xor r9 r9
-		jmp r10 //jump to instruction
+		lod cur_inst ip //load current instruction into r11
+		imm temp .InstructionTable
+		add temp2 r11 temp //add offset
+		xor temp temp temp
+		jmp temp2 //jump to instruction
 	.InterpreteEnd
-		jmp .Shell
+		jmp .Main
 	
 //Instructions
-//r7 = ip
-//r8 = sp
-//r9 = temp
-//r10 = temp2
-//r12 = operand 1
-//r13 = operand 2
-//r4 = operand 3 
-//r5 = operand 4
+
+
 //.Result = result of operations
 .push
-	inc r7 r7
-	lod r9 r7
-	str r8 r9
-	xor r9 r9
-	inc r8 r8
+	inc ip ip
+	lod temp ip
+	str stackp temp
+	xor temp temp temp
+	inc stackp stackp
+	inc ip ip
 	jmp .dispatch
 	
 .pop
-	inc r7 r7
-	lod r10 r7
-	bre .Pop_loop1 r10 1 
-	bre .Pop_loop2 r10 2
-	bre .Pop_loop3 r10 3
-	bre .Pop_loop4 r10 4
+	inc ip ip
+	lod temp2 ip
+	bre .Pop_loop1 temp2 1 
+	bre .Pop_loop2 temp2 2
+	bre .Pop_loop3 temp2 3
+	bre .Pop_loop4 temp2 4
 	.Pop_loop1
-		dec r8 r8
-		lod r12 r8
+		dec stackp stackp
+		lod gen1 stackp
 	.Pop_loop2
-		dec r8 r8
-		lod r13 r8
+		dec stackp stackp
+		lod gen2 stackp
 	.Pop_loop3
-		dec r8 r8
-		lod r4 r8
+		dec stackp stackp
+		lod gen3 stackp
 	.Pop_loop4
-		dec r8 r8
-		lod r5 r8
+		dec stackp stackp
+		lod gen4 stackp
 	
-	xor r9 r9
-	str r8 r9
-	xor r10 r10
+	xor temp temp temp
+	str stackp temp
+	xor temp2 temp2 temp2
+	inc ip ip
 	jmp .dispatch
 
 .end
@@ -350,60 +364,74 @@ jmp .Init
 .add
 	jmp .pop
 	jmp .pop
-	add r9 r12 r13
-	str r8 r9
-	inc r8 r8
-	xor r9 r9
+	add temp gen1 gen2
+	str sp temp
+	inc sp sp
+	xor temp temp temp
+	inc ip ip
 	jmp .dispatch
 	
 .sub
 	jmp .pop
 	jmp .pop
-	sub r9 r12 r13
-	str r8 r9
-	inc r8 r8
-	xor r9 r9
+	sub temp r12 r13
+	str stackp temp
+	inc stackp stackp
+	xor temp temp temp
+	inc ip ip
 	jmp .dispatch
 	
 .mul
 	jmp .pop
 	jmp .pop
-	mlt r9 r12 r13
-	str r8 r9
-	inc r8 r8
-	xor r9 r9
+	mlt temp r12 r13
+	str stackp temp
+	inc stackp stackp
+	xor temp temp temp
+	inc ip ip
 	jmp .dispatch
 	
 .div
 	jmp .pop
 	jmp .pop
-	div r9 r12 r13
-	str r8 r9
-	inc r8 r8
-	xor r9 r9
+	div temp r12 r13
+	str stackp temp
+	inc stackp stackp
+	xor temp temp temp
+	inc ip ip
 	jmp .dispatch
 
 .goto
-	inc r7 r7
-	lod r9 r7
-	mov r7 r9
-	xor r9 r9
+	inc ip ip
+	lod temp ip
+	mov ip temp
+	xor temp temp temp
+	inc ip ip
 	jmp .dispatch
 
+.int
+	
+	brg .Ins_SystemCall_InvalidSyscall r1 56
+    .scal_1
+		ret
+	llod r15 .Syscalls r1
+	cal r15
+	inc ip ip
+    ret
 
 // Some syscalls ------------------------------------------------------------
 .Scal
-	
-	brg .Ins_SystemCall_InvalidSyscall r1 15
-        .scal_1
+	brg .Ins_SystemCall_InvalidSyscall r1 56
+    .scal_1
+		ret
 	llod r15 .Syscalls r1
 	cal r15
-        ret
+    ret
 
 //----------------------------------------------------------------------------------------
 //Errors ---------------------------------------------------------------------------------
 .Ins_SystemCall_InvalidSyscall
-	STR .errorCode 1
+	str .errorCode 1
 	jmp .scal_1
 
 //----------------------------------------------------------------------------------------
@@ -768,7 +796,7 @@ jmp .Init
     imm r6 0
     psh r7 // x
     imm r7 0
-    psh r8 // additional info
+    psh stackp // additional info
     add r1 r1 2 // ndata = data[2:]
     out %buffer 1
     .render_foryinrangeh
@@ -781,17 +809,17 @@ jmp .Init
            add r6 r6 r3
            out %y r6
            pop r6
-           mlt r8 r6 r5
-           add r8 r8 r7
-           llod r8 r8 r1
-           out %color r8
+           mlt stackp r6 r5
+           add stackp stackp r7
+           llod stackp stackp r1
+           out %color stackp
            inc r7 r7
            bne .render_foryinrangeh_forxinrangew r7 r5
        imm r7 0
        inc r6 r6
        bne .render_foryinrangeh r6 r4 
     out %buffer 2
-    pop r8
+    pop stackp
     pop r7
     pop r6
     pop r5
@@ -959,7 +987,7 @@ jmp .Init
         mov r1 r3
         pop r3
         pop r2
-        pop r9
+        pop temp
         ret
 	
 .button_create //Create a button in window
@@ -997,7 +1025,7 @@ jmp .Init
     pop r4
     pop r3
     pop r2
-    pop r9
+    pop temp
     ret
     
 .window_create //Create Window
@@ -1025,7 +1053,7 @@ jmp .Init
     pop r3
     mov r1 r2
     pop r2
-    pop r9
+    pop temp
     ret
 
 .window_fill //Fill a window with color lolol
@@ -2107,7 +2135,7 @@ ret
 
 // image: R1 const Bin[ 64 ]*, x: R2 const int, y: R3 const int,
 // src_x: var R4, src_y: var R5, src_i/color: var R6
-// screen_width: const R8
+// screen_width: const stackp
 .draw_sprite8x8
     IMM R5 0
     .loop_y
@@ -2173,7 +2201,7 @@ ret
     pop r4
     pop r3
     pop r2
-    pop r9
+    pop temp
     ret
     .e_over_31
     bsl r3 r3 15
@@ -2183,7 +2211,7 @@ ret
     pop r4
     pop r3
     pop r2
-    pop r9
+    pop temp
     ret
     .float_construct_end_0
         pop r4
@@ -2229,7 +2257,7 @@ ret
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 	.f16_from_int__if2
 		bsl r3 r3 15
@@ -2239,7 +2267,7 @@ ret
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 	.f16_from_int__end0
 		pop r4
@@ -2280,7 +2308,7 @@ ret
 	pop r4
 	pop r3
 	pop r2
-	pop r9
+	pop temp
 	ret
 
 .f16_add 
@@ -2291,19 +2319,19 @@ ret
 	psh r5 
 	psh r6 
 	psh r7 
-	psh r8
+	psh stackp
 	xor r3 r2 r1 
 	and r3 r3 0x8000
 	bre .f16_add__if1_end r3 0
 	cal .f16_sub
-	pop r8
+	pop stackp
 	pop r7
 	pop r6
 	pop r5
 	pop r4
 	pop r3
 	pop r2
-	pop r9
+	pop temp
 	ret
 	.f16_add__if1_end
 		and r3 r1 0x8000
@@ -2329,14 +2357,14 @@ ret
 		imm r1 0x7fff
 	.f16_add__if4_end 
 		or r1 0x7c00 r3
-		pop r8
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 	.f16_add__if3_end
 		and r4 r1 0x7c00 
@@ -2344,29 +2372,29 @@ ret
 		sub r6 r4 r5
 		mov r7 r4
 		brz .f16_add__if5_else r6
-		bsr r8 r6 10
+		bsr stackp r6 10
 		brz .f16_add__if6_else r5
 		and r2 r2 1023 
 		or r2 r2 1024 
-		bsr r2 r2 r8 
+		bsr r2 r2 stackp 
 		jmp .f16_add__if6_end
 	.f16_add__if6_else
-		dec r8 r8 
-		bsr r2 r2 r8 
+		dec stackp stackp 
+		bsr r2 r2 stackp 
 	.f16_add__if6_end
 		jmp .f16_add__if5_end
 	.f16_add__if5_else
 		bnz .f16_add__if7_else r5
 		add r1 r1 r2 
 		or r1 r1 r3
-		pop r8
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 		jmp .f16_add__if7_end
 	.f16_add__if7_else
@@ -2379,33 +2407,33 @@ ret
 			bre .f16_add__if8_end r7 r5
 			and r6 r1 1023 
 			or r6 r6 1024
-			add r8 r6 r2 
-			rsh r8 r8
+			add stackp r6 r2 
+			rsh stackp stackp
 			add r7 r7 0x400 
-			and r8 r8 1023 
-			or r4 r7 r8
+			and stackp stackp 1023 
+			or r4 r7 stackp
 			.f16_add__if8_end
 				brl .f16_add__if9_end r4 0x7c00 
 				or r1 r3 0x7c00 
-				pop r8
+				pop stackp
 				pop r7
 				pop r6
 				pop r5
 				pop r4
 				pop r3
 				pop r2
-				pop r9
+				pop temp
 				ret
 	.f16_add__if9_end
 		or r1 r4 r3
-		pop r8
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 
 .f16_sub
@@ -2416,22 +2444,22 @@ ret
 	psh r5 
 	psh r6 
 	psh r7 
-	psh r8
-	psh r9
+	psh stackp
+	psh temp
 	xor r3 r1 r2 // a ^ b
 	and r3 r3 0x8000  // (a^b) & 0x8000
 	brz .f16_sub__if1_end r3 // if((a^b)&0x8000 != 0) {
 	xor r2 r2 0x8000
 	cal .f16_add // return f16_add(a, b ^ 0x8000);
-	pop r9
-	pop r8
+	pop temp
+	pop stackp
 	pop r7
 	pop r6
 	pop r5
 	pop r4
 	pop r3
 	pop r2
-	pop r9
+	pop temp
 	ret
 	.f16_sub__if1_end // } 
 		and r3 r1 0x8000 // sign = a & 0x8000
@@ -2446,116 +2474,116 @@ ret
 		and r5 r1 0xf800 // ax = a & 0xf800
 		and r6 r2 0xf800 // bx = b & 0xf800
 		setge r7 r1 0xf800 // is a >= 0xf800 ?
-		setge r8 r2 0xf800 // is b >= 0xf800 ?
-		or r7 r7 r8 // (a >= 0xf800 || b >= 0xf800) ?
+		setge stackp r2 0xf800 // is b >= 0xf800 ?
+		or r7 r7 stackp // (a >= 0xf800 || b >= 0xf800) ?
 		and r7 r7 1 // bool(a >= 0xf800 || b >= 0xf800)
 		brz .f16_sub__if3_end r7 // if(a >= 0xf800 || b >= 0xf800) {
 		setg r7 r1 0xf800 // is a > 0xf800 ?
-		setg r8 r2 0xf800 // is b > 0xf800 ?
-		sete r9 r1 r2     // is a == b?
-		or r7 r8 r7       // (a > 0xf800 || b > 0xf800) ?
-		or r7 r7 r9       // (a > 0xf800 || b > 0xf800 || a == b) ?
+		setg stackp r2 0xf800 // is b > 0xf800 ?
+		sete temp r1 r2     // is a == b?
+		or r7 stackp r7       // (a > 0xf800 || b > 0xf800) ?
+		or r7 r7 temp       // (a > 0xf800 || b > 0xf800 || a == b) ?
 		and r7 r7 1       // bool(a > 0xf800 || b > 0xf800 || a == b)
 		brz .f16_sub__if4_end r7 // if(a > 0xf800 || b > 0xf800 || a == b) {
 		imm r1 0x7fff // return 0x7fff;
-		pop r9
-		pop r8
+		pop temp
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 	.f16_sub__if4_end // }
 		or r7 r3 0x7c00   //res = sign | 0x7c00
 		bne .f16_sub__if5_else r1 0xf800 // if(a == 0xf800) {
 		mov r1 r7 // return res
-		pop r9
-		pop r8
+		pop temp
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 	.f16_sub__if5_else // } else {
 		xor r1 r7 0x8000 // return res ^ 0x8000;
-		pop r9
-		pop r8
+		pop temp
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 	.f16_sub__if3_end // } 
 		sub r7 r5 r6 // exp_diff = ax - bx;
-		mov r8 r5 // exp_part = ax;
+		mov stackp r5 // exp_part = ax;
 		bre .f16_sub__if6_else r7 0 // if(exp_diff != 0) {
-		bsr r9 r7 11                // shift = exp_diff >> 11;
+		bsr temp r7 11                // shift = exp_diff >> 11;
 		bre .f16_sub__if7_else r6 0 // if (bx != 0) {   
 		and r2 r2 2047              // b &= 2047
 		or r2 r2 2048               // b |= 2048
-		bsr r2 r2 r9                // b >>= shift
+		bsr r2 r2 temp                // b >>= shift
 		jmp .f16_sub__if7_end       // }
 	.f16_sub__if7_else          // else {
-		dec r9 r9                   // shift -=1 
-		bsr r2 r2 r9                // b >>= shift-1
+		dec temp temp                   // shift -=1 
+		bsr r2 r2 temp                // b >>= shift-1
 	.f16_sub__if7_end           // }
 		jmp .f16_sub__if6_end       // }
 	.f16_sub__if6_else          // else {
 		bne .f16_sub__if8_else r6 0 // if(bx == 0) {
-		sub r9 r1 r2                // res = a - b
-		rsh r9 r9                   // res >>= 1 ; res = (a-b)>>1;
-		bne .f16_sub__if9_end r9 0 // if(res == 0) {
-		mov r1 r9                   // return res;
-		pop r9
-		pop r8
+		sub temp r1 r2                // res = a - b
+		rsh temp temp                   // res >>= 1 ; res = (a-b)>>1;
+		bne .f16_sub__if9_end temp 0 // if(res == 0) {
+		mov r1 temp                   // return res;
+		pop temp
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 	.f16_sub__if9_end // }
-		or r1 r9 r3     // return res | sign;
-		pop r9
-		pop r8
+		or r1 temp r3     // return res | sign;
+		pop temp
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 	.f16_sub__if8_else // } else {
 		and r2 r2 2047 // b &= 2047
 		or r2 r2 2048  // b |= 2048
 	.f16_sub__if8_end // }
 		.f16_sub__if6_end // }
-			sub r9 r1 r2    // 
-			and r7 r9 0xf800 
-			bne .f16_sub__if11_end r7 r8
-			rsh r9 r9 
-			or r1 r9 r3
-			pop r9
-			pop r8
+			sub temp r1 r2    // 
+			and r7 temp 0xf800 
+			bne .f16_sub__if11_end r7 stackp
+			rsh temp temp 
+			or r1 temp r3
+			pop temp
+			pop stackp
 			pop r7
 			pop r6
 			pop r5
 			pop r4
 			pop r3
 			pop r2
-			pop r9
+			pop temp
 			ret
 	.f16_sub__if11_end
 		and r5 r1 2047 
@@ -2563,42 +2591,42 @@ ret
 		sub r6 r5 r2
 		bne .f16_sub__if10_end r6 0
 		imm r1 0
-		pop r9
-		pop r8
+		pop temp
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 	.f16_sub__if10_end
 		.f16_sub__while1 
-		setne r5 r8 0 
+		setne r5 stackp 0 
 		and r7 r6 2048 
 		sete r7 r7 0
 		and r5 r5 r7
 		and r5 r5 1
 		brz .f16_sub__while1_end r5
-		sub r8 r8 0x800
-		bre .f16_sub__while1 r8 0
+		sub stackp stackp 0x800
+		bre .f16_sub__while1 stackp 0
 		lsh r6 r6 
 		jmp .f16_sub__while1
 	.f16_sub__while1_end
 		and r1 r6 2047 
-		or r1 r1 r8 
+		or r1 r1 stackp 
 		rsh r1 r1 
 		or r1 r1 r3
-		pop r9
-		pop r8
+		pop temp
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 
 .f16_mul 
@@ -2609,7 +2637,7 @@ ret
 	psh r5 
 	psh r6 
 	psh r7 
-	psh r8
+	psh stackp
 	xor r3 r2 r1 
 	and r3 r3 0x8000 
 	and r4 r1 0x8000 
@@ -2629,25 +2657,25 @@ ret
 	or r4 r4 r5 
 	brz .f16_mul__if2_end r4
 	imm r1 0x7fff
-	pop r8
+	pop stackp
 	pop r7
 	pop r6
 	pop r5
 	pop r4
 	pop r3
 	pop r2
-	pop r9
+	pop temp
 	ret
 	.f16_mul__if2_end
 		or r1 r3 0x7c00
-		pop r8
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 	.f16_mul__if1_end
 		and r4 r1 0x7fff 
@@ -2659,14 +2687,14 @@ ret
 		or r4 r4 r5
 		brz .f16_mul__if3_end r4
 		imm r1 0
-		pop r8
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 	.f16_mul__if3_end
 		and r4 r1 0x7c00 
@@ -2681,9 +2709,9 @@ ret
 		mlt r5 r5 1024 
 		and r6 r2 1023 
 		or r5 r5 r6
-		mlt r8 r4 r5 
+		mlt stackp r4 r5 
 		umlt r7 r4 r5
-		mov r4 r8
+		mov r4 stackp
 		and r5 r1 0x7c00 
 		bsr r5 r5 10 
 		sete r6 r5 0 
@@ -2691,32 +2719,32 @@ ret
 		add r5 r5 r6
 		and r6 r2 0x7c00 
 		bsr r6 r6 10 
-		sete r8 r6 0 
-		and r8 r8 1 
-		add r6 r6 r8
+		sete stackp r6 0 
+		and stackp stackp 1 
+		add r6 r6 stackp
 		add r5 r5 r6 
 		sub r5 r5 15
-		and r8 r8 0b10000 
-		bre .f16_mul__if4_elseif r8 0 
+		and stackp stackp 0b10000 
+		bre .f16_mul__if4_elseif stackp 0 
 		psh r7 
 		bsr r7 r7 11 
 		bsr r4 r4 11 
-		pop r8 
-		bsl r8 r8 5 
-		or r4 r4 r8
+		pop stackp 
+		bsl stackp stackp 5 
+		or r4 r4 stackp
 		inc r5 r5
 		jmp .f16_mul__if4_end
 	.f16_mul__if4_elseif
-		and r8 r7 0b1000 
-		bre .f16_mul__if4_else r8 0
+		and stackp r7 0b1000 
+		bre .f16_mul__if4_else stackp 0
 		psh r7
 		psh r7 
 		bsr r7 r7 10 
 		bsr r4 r4 10 
-		pop r8
+		pop stackp
 		pop r7  
-		bsl r8 r8 6 
-		or r4 r4 r8
+		bsl stackp stackp 6 
+		or r4 r4 stackp
 		jmp .f16_mul__if4_end
 	.f16_mul__if4_else
 		sub r5 r5 10
@@ -2730,9 +2758,9 @@ ret
 		psh r7
 		bsr r7 r7 1 
 		bsr r4 r4 1 
-		pop r8
-		bsl r8 r8 15 
-		or r4 r4 r8
+		pop stackp
+		bsl stackp stackp 15 
+		or r4 r4 stackp
 		inc r5 r5
 		jmp .f16_mul__while1
 	.f16_mul__while1_end
@@ -2745,37 +2773,37 @@ ret
 			bsr r7 r7 r5 
 			bsr r4 r4 r5 
 			sub r5 16 r5 
-			pop r8
+			pop stackp
 			pop r7 
-			bsl r8 r8 r5 
-			or r4 r4 r8 
+			bsl stackp stackp r5 
+			or r4 r4 stackp 
 			imm r5 0 
 	.f16_mul__if5_elseif
 		brl .f16_mul__if5_end r5 31
 		and r1 r3 0x8000 
 		or r1 r1 0x7c00
-		pop r8
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 	.f16_mul__if5_end
 		bsl r1 r5 10 
 		and r4 r4 1023 
 		or r1 r1 r4 
 		or r1 r1 r3
-		pop r8
+		pop stackp
 		pop r7
 		pop r6
 		pop r5
 		pop r4
 		pop r3
 		pop r2
-		pop r9
+		pop temp
 		ret
 
 //EOF -----------------------------------------------------------------------------------
@@ -2801,7 +2829,7 @@ ret
     add r1 r1 r2
     rsh r1 r1
     pop r2
-    pop r9
+    pop temp
     ret
     
 .pow
@@ -2838,7 +2866,7 @@ ret
         ret
 
 .printf // r1 = char*
-    pop r9 // ret*
+    pop temp // ret*
     str 0xee0 r1 
     str 0xee1 r2
     str 0xee2 r3
@@ -2888,7 +2916,7 @@ ret
         lod r3 0xee2
         lod r2 0xee1
         lod r1 0xee0
-        jmp r9
+        jmp temp
     .printf__percsub__err_str
         dw [ "Wrong percentage-value %c" 0 ]
 
@@ -2912,7 +2940,7 @@ ret
         mov r1 r3
         pop r3
         pop r2
-        pop r9
+        pop temp
         ret
 
 .strcpy
@@ -2971,9 +2999,9 @@ DW [ 0 d8     e1 d4   c1 d8   d1 d8   b1 d4   0 d8 ] // play from bar 2 again
 DW [ 0 d4     g1 d8   fs1 d8  ds1 d8  e1 d8 ]
 .bar7
 DW [ gs d8    a1 d8   c1 d8   0 d8    a1 d8   c1 d8   d1 d8 ] 
-.bar8
+.bastackp
 DW [ 0 d4     g1 d8   fs1 d8  ds1 d4  e1 d8 ]
-.bar9
+.batemp
 DW [ 0 d8     c2 d4   c2 d8   c2 d4   0 d8 ]
 .bar10
 DW [ 0 d4     g1 d8   fs1 d8  ds1 d4  e1 d8 ]

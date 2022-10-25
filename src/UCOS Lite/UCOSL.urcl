@@ -12,6 +12,7 @@ MINSTACK 512
 RUN ROM
 .Main
 	in r16 %num //read
+	
 	lstr .Thread p r16
 	inc p p 
 	bne .Main r16 65535
@@ -168,7 +169,7 @@ RUN ROM
 	// dw .duplicate
 	dw .end
 	
-	//Bytecode interpreter
+//Bytecode interpreter
 //https://en.wikipedia.org/wiki/Threaded_code
 //go to the "Token threaded" part and read
 .InterpretLoop
@@ -184,7 +185,7 @@ RUN ROM
 		lod r11 ip //load current instruction into r11
 		imm r9 .InstructionTable
 		add r10 r11 r9 //add offset
-		xor r9 r9
+		xor r9 r9 r9
 		jmp r10 //jump to instruction
 	.InterpreteEnd
 		jmp .Main
@@ -203,7 +204,7 @@ RUN ROM
 	inc r7 r7
 	lod r9 r7
 	str r8 r9
-	xor r9 r9
+	xor r9 r9 r9
 	inc r8 r8
 	jmp .dispatch
 	
@@ -227,9 +228,9 @@ RUN ROM
 		dec r8 r8
 		lod r5 r8
 	
-	xor r9 r9
+	xor r9 r9 r9
 	str r8 r9
-	xor r10 r10
+	xor r10 r10 r10
 	jmp .dispatch
 
 .end
@@ -241,7 +242,7 @@ RUN ROM
 	add r9 r12 r13
 	str r8 r9
 	inc r8 r8
-	xor r9 r9
+	xor r9 r9 r9
 	jmp .dispatch
 	
 .sub
@@ -250,7 +251,7 @@ RUN ROM
 	sub r9 r12 r13
 	str r8 r9
 	inc r8 r8
-	xor r9 r9
+	xor r9 r9 r9
 	jmp .dispatch
 	
 .mul
@@ -259,7 +260,7 @@ RUN ROM
 	mlt r9 r12 r13
 	str r8 r9
 	inc r8 r8
-	xor r9 r9
+	xor r9 r9 r9
 	jmp .dispatch
 	
 .div
@@ -268,13 +269,13 @@ RUN ROM
 	div r9 r12 r13
 	str r8 r9
 	inc r8 r8
-	xor r9 r9
+	xor r9 r9 r9
 	jmp .dispatch
 
 .goto
 	inc r7 r7
 	lod r9 r7
 	mov r7 r9
-	xor r9 r9
+	xor r9 r9 r9
 	jmp .dispatch
 
