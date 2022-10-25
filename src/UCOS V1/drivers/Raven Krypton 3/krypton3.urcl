@@ -1,0 +1,3 @@
+bits 16
+minheap 8192
+minstack 256
