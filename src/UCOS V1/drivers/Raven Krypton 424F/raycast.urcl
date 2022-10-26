@@ -1,0 +1,47 @@
+//Raycaster for the Raven Krypton graphics card.
+//Public API:
+//(WIP)
+
+.VTable //vertex table
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	dw [0 0 0]
+	
+.ETable //Edge table
+	dw [0 0]
+	dw [0 0]
+	dw [0 0]
+	dw [0 0]
+	
+	
+.GetEdge //R1: 
+	
