@@ -8,7 +8,11 @@
  *	mantissa and 16 bit exponent.
  *
  *	Public interface:
- *	void Float_init(): Inits the float
+ *	- void Float_init(): Inits the float
+ *	- ptr NewFloat(): creates new float and returns ptr
+ *	- void dispose(int index): disposes of float [index]
+ *	- void set(int index, int index2): sets the float of index2 to 
+ *	  index
  *
  **/
  
