@@ -1,0 +1,103 @@
+BITS 16
+MINREG 16
+MINHEAP 32768
+MINSTACK 8192
+
+//Float 
+//48 bit float format
+//SSSSSSSSSSSSSSSS: Sign(+/-)
+//EEEEEEEEEEEEEEEE: Exponent(-32767 - 32768)
+//MMMMMMMMMMMMMMMM: Mantissa(-32767 - 32768)
+//float = SM*BASE^E 
+//floats are basically scientific notation
+
+@define allocs 0
+@define temp 0
+@define BASE 10 //base 10
+@define _BASE 2 //unused, but if base 2
+
+.Float_init:
+	xor r1 r1
+	xor r2 r2
+	xor r3 r3
+	xor r4 r4
+	
+.FloatPtrTable //for addressing floats
+	dw 0
+
+.NewFloat //Creates new float & returns the pointer to r1
+	imm r1 3
+	cal .malloc
+	lstr r1 0 0 //sign(s)
+	lstr r1 1 0 //Exponent
+	lstr r1 2 0 //mantissa
+	lstr allocs .FloatPtrTable r1
+	inc allocs allocs
+	ret
+	
+.dispose //Float alloc # in r1; do `llod r1 .FloatPtrTable x` in which
+	//x is  the alloc #
+	cal .free
+	dec allocs allocs
+	
+	.dispose_loop1
+		llod r2 .FloatsPtrTable temp
+		bre .dispose_loop2 r2 r1
+		inc temp temp
+		jmp .dispose_loop1
+		
+	.dispose_loop2
+		xor r3 r3
+		str r2 r3
+		jmp .dispose_loop3
+	.dispose_loop3
+		inc temp temp
+		lod r3 temp
+		dec temp temp
+		str temp r3
+		lod temp temp
+		brz .dispose_end temp
+		jmp .dispose_loop3
+	.dispose_end
+		ret
+
+
+.set //r4 = index of float; sets the value of this float from another float
+	llod r4 .FloatPtrTable r4
+	llod r1 r4 0
+	llod r2 r4 1 
+	llod r3 r4 2
+	cal ._setConst
+	ret
+
+//Utility Functions
+._exp: //r1 = index of float; gets the exponent
+	llod r1 .FloatPtrTable r1
+	llod r1 r1 0
+	mov r2 r1
+	cpy r1 r2
+	ret
+	
+._man: //r1 = index of float; gets mantissa
+	llod r1 .FloatPtrTable r1
+	llod r1 r1 1
+	mov r2 r1
+	cpy r1 r2
+	ret
+	
+._sign: //r1 = index of float; gets sign of float, either 0x0000 or 0xffff
+	llod r1 .FloatPtrTable r1
+	llod r1 r1 2
+	mov r2 r1
+	cpy r1 r2
+	ret
+	
+._setConst //r1 = manth r2 = exp r3 = s //r4 = index of float
+	llod r4 .FloatPtrTable r4
+	lstr r4 0 r1
+	lstr r4 1 r2
+	lstr r4 2 r3
+	ret
+
+
+	

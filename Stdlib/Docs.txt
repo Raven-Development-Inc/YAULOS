@@ -1,0 +1,129 @@
+// Copyright 2012 Mark Armbrust.  Permission granted
+// for educational use.
+//Copyright 2022 DiamondCoder1000. Permission granted
+// for any use
+
+ /**
+ *	Type Float -- floating point arithmetic.
+ *
+ *	This class implements floating point arithmetic with 32 bit signed
+ *	mantissa and 16 bit exponent.  This gives about 9.3 decimal digit
+ *	precision.
+ *
+ *	The exponent is artificially limited to 10 bits which limits the
+ *	base-10 exponents to about +-150.  (This limits the size of tables
+ *	of constants required for FP to string conversion.)
+ *
+ *	Representable numbers:
+ *		[-1.34078079(2)e+154, -7.45834073(1)e-155],
+ *		0,
+ *		[ 7.45834073(1)e-155,  1.34078079(2)e+154]
+ *
+ *	Public interface:
+ *
+ *	Initialization
+ *		function void init()
+ *
+ *	Constructor / destructor / assignment
+ *		function Ptr NewFloat(void)
+ *		function void dispose()
+ *		function void set(int msw, int lsw, int exp)
+ *
+ *	Constants
+ *		function int maxExp()
+ *		function int minExp()
+ *		function Float posInf()
+ *		function Float negInf()
+ *
+ *	Arithmetic
+ *		function Float neg()
+ *		function Float add(Float f)
+ *		function Float addInt(int i)
+ *		function Float sub(Float f)
+ *		function Float subInt(int i)
+ *		function Float mult(Float f)
+ *		function Float multInt(int i)
+ *		function Float div(Float f)
+ *		function Float divInt(int i)
+ *		function Float sqrt()
+ *
+ *	Tests
+ *		function int compare(Float f) 
+ *		function int compareInt(int i) 
+ *		function bool isZero() 
+ *		function bool isNeg() 
+ *		function bool isPos() 
+ *
+ *	I/O
+ *		function void print(int n)
+ *		function String toString(int n)
+ *		function Float setString(String s)
+ *
+ *
+ *	Example usage:
+ *
+ *		var Float f;
+ *		var Float g;
+ *		let f = Float.new();
+ *		let g = Float.new();
+ *
+ *		do f.setInt(355);
+ *		do g.setInt(113);
+ *		do f.div(g);
+ * 		do f.print(6);		// Prints 3.14159e+000
+ *
+ *		do f.dispose();
+ *		do g.dispose();
+ **/
+ 
+ 
+ /** Type Cordic -- CORDIC algorithm for computing circular functions.
+ *
+ *	This class implements the CORDIC algorithm.  
+ *
+ *	Public interface:
+ *		function void init()
+ *		function void cordic (Float x, Float y, Float z, bool mode)
+ *		function void setN (int n)
+ *	** W A R N I N G ***
+ * 	This library assumes that Float.init() has already been called.
+ **/
+ 
+ 
+ /** Type Trig -- trigonometric functions using type Float.
+ *
+ *	This class implements floating point trigonometric functions.
+ *
+ *	All angles are in radians.
+ *	All functions that return a Float return a static variable that
+ *	must be copied.
+ *
+ *	Public interface:
+ *
+ *	Initialization
+ *		function void init()
+ *
+ *	Constants and conversions
+ *		function Float pi()
+ *		function Float rad(Float d)
+ *		function Float deg(Float r)
+ *
+ *	Basic functions
+ *		function Float sin(Float a)
+ *		function Float cos(Float a)
+ *		function Float tan(Float a)
+ *		function Float asin(Float x)
+ *		function Float acos(Float x)
+ *		function Float atan(Float x)
+ *		function Float atan2(Float y, Float x)
+ *
+ *	Auxiliary functions
+ *		function void toRect(Float r, Float a, Float ret_x, Float ret_y)
+ *		function void toPolar(Float x, Float y, Float ret_r, Float ret_a)
+ *		function Float lastSin()
+ *		function Float lastCos()
+ *	** W A R N I N G ***
+ * 	This library assumes that Float.init() has already been called.
+ **/
+ 
+ 
