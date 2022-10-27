@@ -17,7 +17,8 @@ RUN ROM
 .Main
 	in r16 %text //read
 	imm r15 .string
-	lod r16 r15
+	lod r15 r16
+	
 	lstr .Thread p r16
 	inc p p 
 	bne .Main r16 'r'
@@ -39,6 +40,9 @@ RUN ROM
       dec temp temp
       brz .str2intend temp
       jmp .str2int1
+    .str2intend
+      mov r1 a
+      ret
 
 .map
     llod r1 r1 r2 //r2 = offset r1 = str ptr
