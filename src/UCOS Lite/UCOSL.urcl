@@ -6,6 +6,7 @@
 @define p 0
 @define temp 0
 
+
 BITS == 16
 MINREG 16
 MINHEAP 8192
@@ -27,7 +28,22 @@ RUN ROM
     cal .strlen //r1 = ptr string
     mov temp r1
     bre .str2intend temp 0
+    mlt a 10 a
+    add a a 
+
+.map
+    llod r1 r1 r2 //r2 = offset
+    bre 
     
+    .map0
+        imm r1 48
+	ret
+    .map1
+        imm r1 49
+	ret
+    .map2
+        imm r1 48
+	ret
 
 .strlen
     psh r1 // str *
