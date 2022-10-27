@@ -26,6 +26,7 @@ RUN ROM
 .string2int
     cal .strlen //r1 = ptr string
     mov temp r1
+    bre .str2intend temp 0
     
 
 .strlen
