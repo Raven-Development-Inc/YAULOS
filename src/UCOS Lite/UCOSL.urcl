@@ -4,21 +4,47 @@
 @define ip r7
 @define stackp r8
 @define p 0
+@define temp 0
 
 BITS == 16
 MINREG 16
 MINHEAP 8192
 MINSTACK 512
 RUN ROM
+
+
 .Main
-	in r16 %num //read
+	in r16 %text //read
 	
 	lstr .Thread p r16
 	inc p p 
-	bne .Main r16 65535
+	bne .Main r16 'r'
 	imm r6 .Thread
 	jmp .InterpretLoop
 
+
+.string2int
+    cal .strlen //r1 = ptr string
+    mov temp r1
+    
+
+.strlen
+    psh r1 // str *
+    psh r2 // additional reg
+    psh r3
+    imm r3 0
+    .strlen__loop1
+        lod r2 r1
+        bre .strlen__end r2 0
+        inc r3 r3
+        inc r1 r1
+        jmp .strlen__loop1
+    .strlen__end
+        mov r1 r3
+        pop r3
+        pop r2
+        pop r9
+        ret
 
 .Thread //128 bytes
 	dw 0
