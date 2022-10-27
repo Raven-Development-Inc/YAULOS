@@ -32,8 +32,8 @@ RUN ROM
     add a a 
 
 .map
-    llod r1 r1 r2 //r2 = offset
-    bre 
+    llod r1 r1 r2 //r2 = offset r1 = str ptr
+    bre .map0 
     
     .map0
         imm r1 0
@@ -55,6 +55,15 @@ RUN ROM
 	ret
      .map6
         imm r1 6
+	ret
+     .map7
+        imm r1 7
+	ret
+     .map8
+        imm r1 8
+	ret
+     .map9
+        imm r1 9
 	ret
 	
 .strlen
