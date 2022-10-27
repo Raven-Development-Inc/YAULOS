@@ -18,8 +18,10 @@ RUN ROM
 	in r16 %text //read
 	imm r15 .string
 	lod r15 r16
-	
-	lstr .Thread p r16
+	imm r1 .string
+	imm r5 .string
+	cal .string2int
+	lstr .Thread p r1
 	inc p p 
 	bne .Main r16 'r'
 	imm r6 .Thread
