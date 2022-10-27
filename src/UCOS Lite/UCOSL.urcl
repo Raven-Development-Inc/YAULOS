@@ -40,9 +40,9 @@ RUN ROM
     bre .map5 r1 '5'
     bre .map6 r1 '6'
     bre .map7 r1 '7'
-    bre .map0 r1 '8'
-    bre .map0 r1 '9'
-    bre .map0 r1 '1'
+    bre .map8 r1 '8'
+    bre .map9 r1 '9'
+    bre .map1 r1 '1'
     
     .map0
         imm r1 0
