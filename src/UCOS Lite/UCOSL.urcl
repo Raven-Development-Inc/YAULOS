@@ -36,15 +36,27 @@ RUN ROM
     bre 
     
     .map0
-        imm r1 48
+        imm r1 0
 	ret
     .map1
-        imm r1 49
+        imm r1 1
 	ret
     .map2
-        imm r1 48
+        imm r1 2
 	ret
-
+    .map3
+        imm r1 3
+	ret
+    .map4
+        imm r1 4
+	ret
+    .map5
+        imm r1 5
+	ret
+     .map6
+        imm r1 6
+	ret
+	
 .strlen
     psh r1 // str *
     psh r2 // additional reg
