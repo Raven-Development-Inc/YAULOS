@@ -5,7 +5,7 @@
 @define stackp r8
 @define p 0
 @define temp 0
-
+@define temp2 0
 
 BITS == 16
 MINREG 16
