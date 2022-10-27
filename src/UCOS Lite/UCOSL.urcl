@@ -33,7 +33,16 @@ RUN ROM
 
 .map
     llod r1 r1 r2 //r2 = offset r1 = str ptr
-    bre .map0 
+    bre .map0 r1 '0'
+    bre .map0 r1 '2'
+    bre .map0 r1 '3'
+    bre .map0 r1 '4'
+    bre .map0 r1 '5'
+    bre .map0 r1 '6'
+    bre .map0 r1 '0'
+    bre .map0 r1 '0'
+    bre .map0 r1 '0'
+    bre .map0 r1 '0'
     
     .map0
         imm r1 0
