@@ -30,9 +30,12 @@ RUN ROM
    
     .str2int1
       mov r2 temp
+      mov r2 r5
+      cal .map
       mlt a 10 a
       add a a r1
-      bre .str2intend temp 0
+      dec temp temp
+      brz .str2intend temp
       jmp .str2int1
 
 .map
