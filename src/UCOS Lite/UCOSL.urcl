@@ -25,9 +25,10 @@ RUN ROM
 
 
 .string2int
-    cal .strlen //r1 = ptr string
+    cal .strlen //r1 = ptr string r5 = another ptr string
     mov temp r1
     bre .str2intend temp 0
+    mov r2 temp
     
     mlt a 10 a
     add a a 
