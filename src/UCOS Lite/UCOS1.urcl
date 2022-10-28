@@ -97,6 +97,8 @@ RUN ROM
      .map9
         imm r1 9
 	ret
+     .end
+        ret
 	
 .strlen
     psh r1 // str *
