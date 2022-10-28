@@ -18,6 +18,7 @@ RUN ROM
 .Main
 	in r16 %text //read
         out %text r16
+	bre .Main2 
 	imm r15 .string
 	lod r15 r16
 	imm r1 .string
