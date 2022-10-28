@@ -23,6 +23,7 @@ RUN ROM
 	.Main2
 	    imm r16 0
         out %text r16
+	bre .Run r16 'r'
 	imm r15 .string
 	lod r15 r16
 	imm r1 .string
