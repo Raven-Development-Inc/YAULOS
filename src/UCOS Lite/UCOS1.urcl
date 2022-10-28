@@ -15,10 +15,14 @@ MINSTACK 512
 RUN ROM
 
 
-.Main
+.Main 
+        out %text '>'
+	out %text ' '
 	in r16 %text //read
+	bre .Main2 r16 '\n'
+	.Main2
+	    imm r16 0
         out %text r16
-	bre .Main2 
 	imm r15 .string
 	lod r15 r16
 	imm r1 .string
@@ -26,9 +30,9 @@ RUN ROM
 	cal .string2int
 	lstr .Thread p r1
 	inc p p 
-	bne .Main r16 'r'
-	imm r6 .Thread
-	jmp .InterpretLoop
+	.Run
+	    imm r6 .Thread
+	    jmp .InterpretLoop
 
 .string
     dw [" " 0]
