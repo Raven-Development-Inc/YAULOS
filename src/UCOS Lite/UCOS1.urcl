@@ -40,10 +40,21 @@ RUN ROM
 .string2int
     cal .strlen //r1 = ptr string r5 = another ptr string
     mov temp r1
-   
+    
     .str2int1
+      llod r7 r5 temp
+      bne .strErrorEnd r7 '0'
+      bne .strErrorEnd r7 '1'
+      bne .strErrorEnd r7 '2'
+      bne .strErrorEnd r7 '3'
+      bne .strErrorEnd r7 '4'
+      bne .strErrorEnd r7 '5'
+      bne .strErrorEnd r7 '6'
+      bne .strErrorEnd r7 '7'
+      bne .strErrorEnd r7 '8'
+      bne .strErrorEnd r7 '9'
       mov r2 temp
-      mov r2 r5
+      mov r1 r5
       cal .map
       mlt a 10 a
       add a a r1
@@ -52,6 +63,8 @@ RUN ROM
       jmp .str2int1
     .str2intend
       mov r1 a
+      ret
+    .strErrorEnd
       ret
 
 .map
