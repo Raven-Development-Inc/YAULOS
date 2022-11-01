@@ -1,7 +1,7 @@
 BITS 16
 MINREG 16
 MINHEAP 32768
-MINSTACK 8192
+MINSTACK 256
 
 //Float 
 //48 bit float format
