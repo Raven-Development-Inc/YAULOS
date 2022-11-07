@@ -1,3 +1,0 @@
-0-32767: Kernel source
-32768-65535: program space
-super simple
