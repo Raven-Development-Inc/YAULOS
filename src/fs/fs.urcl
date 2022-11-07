@@ -147,6 +147,7 @@
 	mul r1 r1 512
 	ret
 
+//IDK why these two are necassary
 // .traversefs
 
 // block_t * getBlock(uint16_t ** memory, block_t * block, uint16_t index) { // read block from the directory/block by index
@@ -154,9 +155,9 @@
 // }
 // .getBlock //r1 = memory //r2 = block index //r3 = index //out: r4: ptr to block
 //     	xor temp temp
-	xor temp1
-	cal .NewBlock
-	mov temp1 r1
+// 	xor temp1
+//      cal .NewBlock
+//      mov temp1 r1
 	
 	
 	
