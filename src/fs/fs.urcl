@@ -152,8 +152,8 @@
 // block_t * getBlock(uint16_t ** memory, block_t * block, uint16_t index) { // read block from the directory/block by index
 //     return (block_t*)(&memory[get_page(block->inline_data[index])][get_raw_addr(block->inline_data[index])]);
 // }
-.getBlock //r1 = memory //r2 = block index //r3 = index //out: r4: ptr to block
-	xor temp temp
+// .getBlock //r1 = memory //r2 = block index //r3 = index //out: r4: ptr to block
+//     	xor temp temp
 	xor temp1
 	cal .NewBlock
 	mov temp1 r1
