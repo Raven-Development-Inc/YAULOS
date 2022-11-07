@@ -1,7 +1,143 @@
 @define MALLOC_MAINP M0
+@define b_allocs 0
+@define allocs 0
+@define temp 0
 
+.FS_init:
+	xor r1 r1
+	xor r2 r2
+	xor r3 r3
+	xor r4 r4
+	xor temp temp
+	
+.SuperBlockPtrTable //for addressing Blocks (maximum 32 Superblocks)
+	dw [0]
+.NewSuperBlock //Creates new super block & returns the pointer to r1
+	bre .EndOfNewSBlock allocs 1
+	imm r1 4
+	cal .malloc
+	//header aka FS1
+	lstr r1 0 0 //header 1
+	lstr r1 1 0 //header 3
+	lstr r1 2 0 //header 3
+	lstr allocs .SuperBlockPtrTable r1
+	inc allocs allocs
+	jmp .EndOfNewSBlock
+	
+	.EndOfNewSBlock
+		ret
+	
+.dispose //Superblock alloc # in r1; do `llod r1 .FloatPtrTable x` in which
+	//x is  the alloc #
+	cal .free
+	dec allocs allocs
+	
+	.dispose_loop1
+		llod r2 .SuperBlockPtrTable temp
+		bre .dispose_loop2 r2 r1
+		inc temp temp
+		jmp .dispose_loop1
+		
+	.dispose_loop2
+		xor r3 r3
+		str r2 r3
+		jmp .dispose_loop3
+	.dispose_loop3
+		inc temp temp
+		lod r3 temp
+		dec temp temp
+		str temp r3
+		lod temp temp
+		brz .dispose_end temp
+		jmp .dispose_loop3
+	.dispose_end
+		ret
 
+._setConst_s //r1 = header[0] r2 = header[1] r3 = header[2] //r4 = starting sector // r5 = index of superblock
+	llod r5 .SuperBlockPtrTable r5
+	lstr r5 0 r1
+	lstr r5 1 r2
+	lstr r5 2 r3
+	lstr r5 3 r4
+	ret
+	
+.BlockPtrTable //for addressing Blocks (256 blocks per disk page)
+	dw [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ]
+.NewBlock //Creates new block & returns the pointer to r1
+	imm r1 1FF //rlly big
+	cal .malloc
+	lstr r1 0 0 //type
+	lstr r1 1 0 //next_block
+	//the rest is generic data
+	lstr allocs .BlockPtrTable r1
+	inc b_allocs b_allocs
+	ret
+	
+.dispose //Superblock alloc # in r1; do `llod r1 .FloatPtrTable x` in which
+	//x is  the alloc #
+	cal .free
+	dec b_allocs b_allocs
+	
+	.dispose_loop1
+		llod r2 .BlockPtrTable temp
+		bre .dispose_loop2 r2 r1
+		inc temp temp
+		jmp .dispose_loop1
+		
+	.dispose_loop2
+		xor r3 r3
+		str r2 r3
+		jmp .dispose_loop3
+	.dispose_loop3
+		inc temp temp
+		lod r3 temp
+		dec temp temp
+		str temp r3
+		lod temp temp
+		brz .dispose_end temp
+		jmp .dispose_loop3
+	.dispose_end
+		ret
 
+._setConst //r1 = type r2 = next r5 = index of superblock
+	llod r5 .FloatPtrTable r5
+	lstr r5 0 r1
+	lstr r5 1 r2
+	ret
+
+._setData //r1 = ptr to data 0 terminating // r2 = index of superblock
+	xor temp temp
+	llod r2 .FloatPtrTable r2
+	add temp r2 2
+	.Loop
+		llod r2 r1 temp
+		brz .SetDataEnd r2
+		str temp r2
+		jmp .Loop
+	.SetDataEnd
+		ret
+		
+		
+.GetPage //r1 = sector addr //out: r1 = page
+	imm temp 8
+	bsr r1 r1 temp
+	ret
+
+.GetRawAddr //r1 = sector addr //out: r1 = raw addr
+	imm temp 0xff
+	and r1 r1 temp
+	mul r1 r1 512
+	ret
+
+// .traversefs
+
+// block_t * getBlock(uint16_t ** memory, block_t * block, uint16_t index) { // read block from the directory/block by index
+//     return (block_t*)(&memory[get_page(block->inline_data[index])][get_raw_addr(block->inline_data[index])]);
+// }
+.getBlock //r1 = memory //r2 = block index //r3 = index //out: r4: ptr to block
+	xor temp temp
+	
+	
 
 //Stdlib V2
 
@@ -326,3 +462,40 @@ ret
         pop r2
         pop r1
         ret
+		
+		
+.assert_reg_eq
+    bre .assert_err R1 R2
+    .assert_err
+        cal .error
+        hlt
+    .error
+        imm R1 error_str
+        cal .printf
+        ret
+    .error_str
+        dw ["Assertion failed, terminating..." 0]
+
+.assert_reg_gt
+    brg .assert_err R1 R2
+    .assert_err
+        cal .error
+        hlt
+    .error
+        imm R1 error_str
+        cal .printf
+        ret
+    .error_str
+        dw ["Assertion failed, terminating..." 0]
+		
+.assert_reg_lt
+    brl .assert_err R1 R2
+    .assert_err
+        cal .error
+        hlt
+    .error
+        imm R1 error_str
+        cal .printf
+        ret
+    .error_str
+        dw ["Assertion failed, terminating..." 0]
