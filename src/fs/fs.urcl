@@ -107,6 +107,27 @@
 	lstr r5 0 r1
 	lstr r5 1 r2
 	ret
+	
+._exp: //r1 = index of float; gets the exponent
+	llod r1 .FloatPtrTable r1
+	llod r1 r1 0
+	mov r2 r1
+	cpy r1 r2
+	ret
+	
+._man: //r1 = index of float; gets mantissa
+	llod r1 .FloatPtrTable r1
+	llod r1 r1 1
+	mov r2 r1
+	cpy r1 r2
+	ret
+	
+._sign: //r1 = index of float; gets sign of float, either 0x0000 or 0xffff
+	llod r1 .FloatPtrTable r1
+	llod r1 r1 2
+	mov r2 r1
+	cpy r1 r2
+	ret
 
 ._setData //r1 = ptr to data 0 terminating // r2 = index of superblock
 	xor temp temp
