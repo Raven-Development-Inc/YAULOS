@@ -102,7 +102,7 @@
 	.dispose_end
 		ret
 
-._setConst //r1 = type r2 = next r5 = index of superblock
+._setConst //r1 = type r2 = next r5 = index of block
 	llod r5 .FloatPtrTable r5
 	lstr r5 0 r1
 	lstr r5 1 r2
