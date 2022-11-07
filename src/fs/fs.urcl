@@ -2,6 +2,9 @@
 @define b_allocs 0
 @define allocs 0
 @define temp 0
+@define temp1 0
+@define temp2 0
+@define temp3 0
 
 .FS_init:
 	xor r1 r1
@@ -136,6 +139,9 @@
 // }
 .getBlock //r1 = memory //r2 = block index //r3 = index //out: r4: ptr to block
 	xor temp temp
+	xor temp1
+	cal .NewBlock
+	mov temp1 r1
 	
 	
 
