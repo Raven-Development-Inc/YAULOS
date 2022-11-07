@@ -108,28 +108,22 @@
 	lstr r5 1 r2
 	ret
 	
-._exp: //r1 = index of float; gets the exponent
+._type: //r1 = index of float; gets the type
 	llod r1 .FloatPtrTable r1
 	llod r1 r1 0
 	mov r2 r1
 	cpy r1 r2
 	ret
 	
-._man: //r1 = index of float; gets mantissa
+._nextBlock: //r1 = index of float; gets next_block
 	llod r1 .FloatPtrTable r1
 	llod r1 r1 1
 	mov r2 r1
 	cpy r1 r2
 	ret
 	
-._sign: //r1 = index of float; gets sign of float, either 0x0000 or 0xffff
-	llod r1 .FloatPtrTable r1
-	llod r1 r1 2
-	mov r2 r1
-	cpy r1 r2
-	ret
 
-._setData //r1 = ptr to data 0 terminating // r2 = index of superblock
+._setData //r1 = ptr to data 0 terminating // r2 = index of block
 	xor temp temp
 	llod r2 .FloatPtrTable r2
 	add temp r2 2
