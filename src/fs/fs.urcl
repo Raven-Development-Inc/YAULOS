@@ -103,20 +103,20 @@
 		ret
 
 ._setConst //r1 = type r2 = next r5 = index of block
-	llod r5 .FloatPtrTable r5
+	llod r5 .BlockPtrTable r5
 	lstr r5 0 r1
 	lstr r5 1 r2
 	ret
 	
 ._type: //r1 = index of float; gets the type
-	llod r1 .FloatPtrTable r1
+	llod r1 .BlockPtrTable r1
 	llod r1 r1 0
 	mov r2 r1
 	cpy r1 r2
 	ret
 	
 ._nextBlock: //r1 = index of float; gets next_block
-	llod r1 .FloatPtrTable r1
+	llod r1 .BlockPtrTable r1
 	llod r1 r1 1
 	mov r2 r1
 	cpy r1 r2
@@ -125,7 +125,7 @@
 
 ._setData //r1 = ptr to data 0 terminating // r2 = index of block
 	xor temp temp
-	llod r2 .FloatPtrTable r2
+	llod r2 .BlockPtrTable r2
 	add temp r2 2
 	.Loop
 		llod r2 r1 temp
@@ -179,8 +179,19 @@
 	jmp .print16_1
     .print16_2
         ret
+	
+	
+	
+//Vars
 .stringex
     dw ["%c" 0]
+    
+    
+    
+    
+    
+    
+    
 //Stdlib V2
 
 
