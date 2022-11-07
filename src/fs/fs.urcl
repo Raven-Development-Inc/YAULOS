@@ -142,7 +142,7 @@
 	xor temp1
 	cal .NewBlock
 	mov temp1 r1
-	m
+	
 	
 	
 
