@@ -159,9 +159,28 @@
 //      cal .NewBlock
 //      mov temp1 r1
 	
+// void print16(uint16_t * str) { // print dynamic amount of chars represented by uint16_t
+//  int i = 0;
+//  while(str[i] != 0) {
+//      printf("%c", str[i]);
+//      i++;
+//  }
+// }
 	
-	
-
+.print16 //r2 = ptr to string of zero terminating shorts
+    xor temp temp
+    .print16_1
+        imm r1 .stringex
+	llod r3 r2 temp
+	brz .print16_2 r3
+	psh r3
+	cal .printf
+	inc temp temp
+	jmp .print16_1
+    .print16_2
+        ret
+.stringex
+    dw ["%c" 0]
 //Stdlib V2
 
 
