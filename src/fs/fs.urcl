@@ -168,11 +168,12 @@
 //     return (block_t*)(&memory[get_page(block->inline_data[index])][get_raw_addr(block->inline_data[index])]);
 // }
 .getBlock //r1 = memory //r2 = block index //r3 = index //out: r4: ptr to block
-    xor temp temp
-    xor temp1
     cal .NewBlock
     mov temp1 r1
+    xor r1 r1 r1
+    imm r1 .temparr
     
+    cal .get_page
 	
 // void print16(uint16_t * str) { // print dynamic amount of chars represented by uint16_t
 //  int i = 0;
