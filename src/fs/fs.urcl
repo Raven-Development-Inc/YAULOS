@@ -139,13 +139,16 @@
         xor temp temp
 	llod r2 .BlockPtrTable r2
 	add temp r2 2
-	.Loop
-		llod r2 r1 temp
-		brz .SetDataEnd r2
-		str temp r2
-		jmp .Loop
-	.SetDataEnd
+	.GetLoop
+		
+		lod temp2 temp
+		str r1 temp2
+		brz .GetEnd r2
+		
+		jmp .GetLoop
+	.GetEnd
 		ret
+		
 		
 .GetPage //r1 = sector addr //out: r1 = page
 	imm temp 8
