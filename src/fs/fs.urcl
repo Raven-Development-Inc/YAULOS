@@ -136,15 +136,13 @@
 		ret
 
 ._getData //r1 = ptr to array // r2 = index of block
-        xor temp temp
+    xor temp temp
 	llod r2 .BlockPtrTable r2
 	add temp r2 2
 	.GetLoop
-		
 		lod temp2 temp
 		str r1 temp2
-		brz .GetEnd r2
-		
+		brz .GetEnd temp2
 		jmp .GetLoop
 	.GetEnd
 		ret
@@ -164,15 +162,19 @@
 //IDK why these two are necassary
 // .traversefs
 
+
 // block_t * getBlock(uint16_t ** memory, block_t * block, uint16_t index) { // read block from the directory/block by index
 //     return (block_t*)(&memory[get_page(block->inline_data[index])][get_raw_addr(block->inline_data[index])]);
 // }
 .getBlock //r1 = memory //r2 = block index //r3 = index //out: r4: ptr to block
     cal .NewBlock
     mov temp1 r1
+	mov temp3 r2
     xor r1 r1 r1
     imm r1 .temparr
-    
+    cal ._getData
+	llod r5 .temparr temp3
+	
     cal .get_page
 	
 // void print16(uint16_t * str) { // print dynamic amount of chars represented by uint16_t

@@ -17,6 +17,7 @@ RUN ROM
 //macros
 //malloc
 @define MALLOC_MAINP M0
+
 //gfx
 @define ax r16
 @define ay r15
@@ -290,7 +291,7 @@ jmp .Init
 .Init
 	cal .init_malloc
 	cal .os_get_ucos_version
-        cal .os_format_disk
+    cal .os_format_disk
 	imm stackp StackBase
 	jmp .ShellInit //infinite loop, not done yet
 
@@ -1870,11 +1871,10 @@ jmp .Init
 
 
 //Memory.urcl ----------------------------------------------------------------------------
-.init_malloc //init_malloc();
+.init_malloc
 str MALLOC_MAINP 0xffff
 ret
 
-//malloc();
 .malloc
     psh r1 // size
     psh r2 // dynamic malloc_start*
@@ -1948,6 +1948,7 @@ ret
         pop r2
         pop r0
         ret
+		
 
 //fastFree();
 .fast_free 
