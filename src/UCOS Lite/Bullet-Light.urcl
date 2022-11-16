@@ -1,12 +1,12 @@
 //Byte code
-@define StackBase 8192
-@define StackSize 4096
+@define StackBase 512
+@define StackSize 1024
 @define ip r7
 @define stackp r8
-@define p 0
-@define temp 0
-@define temp2 0
-@define a 0
+@define p r12
+@define temp r9
+@define temp2 r10
+@define a r11
 
 BITS == 16
 MINREG 16
