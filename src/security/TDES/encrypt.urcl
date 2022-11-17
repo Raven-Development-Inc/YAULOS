@@ -1,0 +1,5 @@
+//2 16 bit keys
+//1 14 bit key
+//each char is multiplied by the first key
+//it is subtracted by the second key
+//then multiplied again by the third key.
