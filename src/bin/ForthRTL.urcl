@@ -1,6 +1,7 @@
 bits 16
 minregs 8
-minram 32768
+minheap 1024
+minstack 256
 
 @define input r2
 @define output r1
