@@ -1,4 +1,4 @@
-// UCOS Lite 0.2.3
+// UCOS Lite 0.2.2
 //Vibe to this shit thats on fire if ur reading: https://www.youtube.com/watch?v=TeXqIhG0888&list=PL3HjO-9hp7nwftlikzs5dNX58olyahWly&index=5
 
 //Bumps:
@@ -17,7 +17,6 @@ RUN ROM
 //macros
 //malloc
 @define MALLOC_MAINP M0
-
 //gfx
 @define ax r16
 @define ay r15
@@ -150,14 +149,54 @@ RUN ROM
 //Registers using (1-15)
 	
 //OS Vars
-.Restricted_sys_vars
+.Bits
+	dw @bits
+.MinReg
+	dw @minreg
+.MinStack
+	dw @minstack
+.MinHeap
+	dw @minheap
+	
+.Variable_Address
+	dw 0
+.sys_vars
     dw 0
-.mouse_x_y //for mouse driver
+.mouse_x_y
     dw [0 0]
 .mouse_button_status
     dw 0
+
+
+
 .currentDirectory
         dw 0 //root dir = 0th dir current DIR is the Index of the directory
+
+//stuff
+//damn, tons of RAM used
+	.e
+		dw ["Setting up SimplexFS please be patient" 0] //tell the user wtf we are doing
+	.e1
+		dw ["10% done" 0] //telling the user how much of the proccess is done
+		//because im nice
+	.e2
+		dw ["20% done" 0]
+	.e3 
+		dw ["30% done" 0]
+	.e4 
+		dw ["40% done" 0]
+	.e5 
+		dw ["50% done" 0]
+	.e6 
+		dw ["60% done" 0]
+	.e7 
+		dw ["70% done" 0]
+	.e8 
+		dw ["80% done" 0]
+	.e9
+		dw ["90% done" 0]
+	.e10
+		dw ["File System Installed. Login: " 0]
 
 .Syscalls //34 sys calls so far, expanding the fs right now (22 wrappers, they don't count)
 	dw .os_get_api_version //1
@@ -251,7 +290,7 @@ jmp .Init
 .Init
 	cal .init_malloc
 	cal .os_get_ucos_version
-    cal .os_format_disk
+        cal .os_format_disk
 	imm stackp StackBase
 	jmp .ShellInit //infinite loop, not done yet
 
@@ -844,7 +883,7 @@ jmp .Init
 
 
 //----------------------------------------------------------------------------------------
-// Z Windowing System(Sweaty)(3AM)(Gone Wrong) -------------------------------------------------------------------
+// Window support(WIP) -------------------------------------------------------------------
 .window_render //Render Window
     psh r1 //window
     psh r2
@@ -1108,11 +1147,11 @@ jmp .Init
 //----------------------------------------------------------------------------------------
 // OS variables
 .version1 //pls dont change
-	dw ["Bullet Linux Version %s" 0xa0 0]
+	dw ["UCOS Version %s" 0xa0 0]
 .version2 //pls dont change
-	dw ["0.2.3" 0]
+	dw ["0.1.6 alpha" 0]
 .api_version //pls dont change
-	dw ["18" 0]
+	dw ["7" 0]
 .errorCode //change with llod
 	dw 0
 //Errors:
@@ -1831,10 +1870,11 @@ jmp .Init
 
 
 //Memory.urcl ----------------------------------------------------------------------------
-.init_malloc
+.init_malloc //init_malloc();
 str MALLOC_MAINP 0xffff
 ret
 
+//malloc();
 .malloc
     psh r1 // size
     psh r2 // dynamic malloc_start*
@@ -1908,7 +1948,6 @@ ret
         pop r2
         pop r0
         ret
-		
 
 //fastFree();
 .fast_free 
